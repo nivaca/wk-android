@@ -184,7 +184,9 @@ an entry opened from the menu of selected text (*rosa*), links with a
 language or a section (`amo#Latin`, `amo#Conjugation`), the suggestions
 while typing, a search, a link and the way back (*lupu*, *wolf*), a word
 without entry (*lupux*, with its similar titles), and the light and dark
-modes.  The build has no warnings from the Kotlin compiler.
+modes.  The release APK of version 1.1, shrunk with R8, was tried on the
+same phone too: an entry with its tables, the menu and the About dialog.
+The build has no warnings from the Kotlin compiler.
 
 The project has 26 files of its own (code, resources and build scripts,
 without the Gradle wrapper and the documentation), with about 1400
