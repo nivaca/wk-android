@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/browser" android:title="@string/menu_browser" />
+    <item android:id="@+id/share" android:title="@string/menu_share" />
+    <item android:id="@+id/reload" android:title="@string/menu_reload" />
+    <item android:id="@+id/languages" android:title="@string/menu_languages" />
+    <item android:id="@+id/text_size" android:title="@string/menu_text_size" />
+    <item android:id="@+id/clear_cache" android:title="@string/menu_clear_cache" />
+    <item android:id="@+id/about" android:title="@string/menu_about" />
+</menu>

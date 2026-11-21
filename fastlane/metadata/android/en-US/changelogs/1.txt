@@ -1,0 +1,1 @@
+First version: search with suggestions, whole entries with their tables, preferred languages, links and history, light and dark mode, lookup from other apps.

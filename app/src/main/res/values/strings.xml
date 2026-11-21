@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">wk</string>
+    <string name="lookup_label">Look up in Wiktionary</string>
+    <string name="search_hint">Word or expression</string>
+    <string name="menu">Menu</string>
+    <string name="menu_browser">Open in the browser</string>
+    <string name="menu_share">Share the link</string>
+    <string name="menu_reload">Download again</string>
+    <string name="menu_languages">Languages…</string>
+    <string name="menu_text_size">Text size…</string>
+    <string name="menu_clear_cache">Delete saved pages</string>
+    <string name="menu_about">About wk</string>
+    <string name="all_languages">all languages</string>
+    <string name="not_found">Wiktionary has no entry for “%1$s”.</string>
+    <string name="did_you_mean">Pages with similar titles:</string>
+    <string name="network_error">Could not reach Wiktionary</string>
+    <string name="retry">Try again</string>
+    <string name="welcome">Type a word, in any language, to see its entry in the English Wiktionary. You can also select a word in another app and choose “Look up in Wiktionary”.</string>
+    <string name="no_entry_yet">There is no entry for “%1$s” yet</string>
+    <string name="cache_cleared">%1$d saved pages deleted</string>
+    <string name="languages_help">The languages to show first, as codes or names, separated by commas. Leave it empty to show the languages in the order of the page.</string>
+    <string name="languages_only">Hide the other languages (they stay in the bar at the top)</string>
+    <string name="about_text">A small app for reading the English Wiktionary.\n\nBy Nicolas Vaughan (nicolasvaughan@proton.me), 2026. Free software, under the GNU General Public License, version 3 or later.\n\nThe entries come from Wiktionary and its contributors, under the CC BY-SA 4.0 licence. wk only shows them; it is not a project of Wiktionary or of the Wikimedia Foundation.</string>
+</resources>

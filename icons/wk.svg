@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- El icono de wk: el mismo dibujo que el icono adaptable de la app -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="18 18 72 72">
+  <rect x="18" y="18" width="72" height="72" rx="16" fill="#1F4E79"/>
+  <path fill="#F8F6F0" d="M31,38c8,-3 16,-3 22,1v33c-6,-4 -14,-4 -22,-1z"/>
+  <path fill="#F8F6F0" d="M77,38c-8,-3 -16,-3 -22,1v33c6,-4 14,-4 22,-1z"/>
+  <path fill="none" stroke="#1F4E79" stroke-width="1.6" stroke-linecap="round"
+    d="M36,45c4,-1 8,-1 12,1M36,51c4,-1 8,-1 12,1M36,57c4,-1 8,-1 12,1M36,63c4,-1 8,-1 12,1M60,46c4,-2 8,-2 12,-1M60,52c4,-2 8,-2 12,-1M60,58c4,-2 8,-2 12,-1M60,64c4,-2 8,-2 12,-1"/>
+</svg>

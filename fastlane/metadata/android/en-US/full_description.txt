@@ -1,0 +1,13 @@
+<p>wk is a small app for reading the English Wiktionary. Type a word, in any language, and it shows the whole entry: etymology, pronunciation, definitions with their quotations, inflection tables, derived terms, translations and the rest.</p>
+
+<ul>
+<li>Suggestions from Wiktionary as you type.</li>
+<li>A bar with the languages of the page. Give the ones you want first (codes or names: <i>la, es, Ancient Greek</i>), and hide the others if you like.</li>
+<li>Section titles open and close when you touch them; wide tables scroll sideways in their own box.</li>
+<li>Links to other entries open in the app, at the right language; Back returns to the previous word, where you left it.</li>
+<li>Light and dark mode, with Wiktionary's own colours for the inflection tables.</li>
+<li>From any app: select a word and choose <i>Look up in Wiktionary</i>, or share a text with wk.</li>
+<li>Pages are kept for a week, so a word seen again opens at once.</li>
+</ul>
+
+<p>The app uses only the Android framework, with no trackers and no other libraries. The content of the entries comes from Wiktionary and its contributors, under the CC BY-SA 4.0 licence; wk is not a project of Wiktionary or of the Wikimedia Foundation.</p>

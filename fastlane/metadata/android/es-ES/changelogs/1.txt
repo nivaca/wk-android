@@ -1,0 +1,1 @@
+Primera versión: búsqueda con sugerencias, entradas completas con sus tablas, lenguas preferidas, enlaces e historial, modo claro y oscuro, consulta desde otras apps.

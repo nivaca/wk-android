@@ -1,0 +1,27 @@
+Categories:
+  - Dictionary
+  - Reading
+License: GPL-3.0-or-later
+AuthorName: Nicolas Vaughan
+AuthorEmail: nicolasvaughan@proton.me
+SourceCode: https://github.com/nivaca/wk-android
+IssueTracker: https://github.com/nivaca/wk-android/issues
+Changelog: https://github.com/nivaca/wk-android/blob/HEAD/CHANGELOG.md
+
+AutoName: wk
+
+RepoType: git
+Repo: https://github.com/nivaca/wk-android.git
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.0
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1

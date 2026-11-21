@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Un libro abierto con renglones; la zona segura del icono adaptable
+     es el círculo central de 66 dp, así que el libro cabe en 30..78. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="@color/icon_page"
+        android:pathData="M31,38c8,-3 16,-3 22,1v33c-6,-4 -14,-4 -22,-1z" />
+    <path android:fillColor="@color/icon_page"
+        android:pathData="M77,38c-8,-3 -16,-3 -22,1v33c6,-4 14,-4 22,-1z" />
+    <path android:strokeColor="@color/icon_ink" android:strokeWidth="1.6" android:strokeLineCap="round"
+        android:pathData="M36,45c4,-1 8,-1 12,1M36,51c4,-1 8,-1 12,1M36,57c4,-1 8,-1 12,1M36,63c4,-1 8,-1 12,1M60,46c4,-2 8,-2 12,-1M60,52c4,-2 8,-2 12,-1M60,58c4,-2 8,-2 12,-1M60,64c4,-2 8,-2 12,-1" />
+</vector>

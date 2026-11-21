@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lookup_label">Buscar en Wiktionary</string>
+    <string name="search_hint">Palabra o expresión</string>
+    <string name="menu">Menú</string>
+    <string name="menu_browser">Abrir en el navegador</string>
+    <string name="menu_share">Compartir el enlace</string>
+    <string name="menu_reload">Descargar de nuevo</string>
+    <string name="menu_languages">Lenguas…</string>
+    <string name="menu_text_size">Tamaño del texto…</string>
+    <string name="menu_clear_cache">Borrar las páginas guardadas</string>
+    <string name="menu_about">Acerca de wk</string>
+    <string name="all_languages">todas las lenguas</string>
+    <string name="not_found">Wiktionary no tiene una entrada para «%1$s».</string>
+    <string name="did_you_mean">Páginas con títulos parecidos:</string>
+    <string name="network_error">No se pudo llegar a Wiktionary</string>
+    <string name="retry">Intentar de nuevo</string>
+    <string name="welcome">Escriba una palabra, en cualquier lengua, para ver su entrada en el Wiktionary en inglés. También puede seleccionar una palabra en otra app y elegir «Buscar en Wiktionary».</string>
+    <string name="no_entry_yet">Todavía no hay una entrada para «%1$s»</string>
+    <string name="cache_cleared">Se borraron %1$d páginas guardadas</string>
+    <string name="languages_help">Las lenguas que se muestran primero, con su código o su nombre en inglés, separadas por comas. Déjelo vacío para ver las lenguas en el orden de la página.</string>
+    <string name="languages_only">Ocultar las demás lenguas (siguen en la barra de arriba)</string>
+    <string name="about_text">Una pequeña app para leer el Wiktionary en inglés.\n\nDe Nicolas Vaughan (nicolasvaughan@proton.me), 2026. Software libre, bajo la Licencia Pública General de GNU, versión 3 o posterior.\n\nLas entradas vienen de Wiktionary y sus colaboradores, bajo la licencia CC BY-SA 4.0. wk solo las muestra; no es un proyecto de Wiktionary ni de la Fundación Wikimedia.</string>
+</resources>

@@ -1,0 +1,15 @@
+# Lo que hacen Gradle y Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+captures/
+# Las claves de firma
+*.jks
+*.keystore
+keystore.properties
+*~
+# Los APK firmados (los hace assembleRelease)
+dist/
