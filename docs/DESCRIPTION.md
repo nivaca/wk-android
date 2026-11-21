@@ -1,22 +1,24 @@
-How wk was made
-===============
+How Wiktionary Reader was made
+==============================
 
 *[Leer en español](DESCRIPCIÓN_es.md)*
 
-wk is a small Android app for reading the English Wiktionary
+Wiktionary Reader is a small Android app for reading the English Wiktionary
 (<https://en.wiktionary.org>).  You type a word or an expression in any
 language, and it shows the whole entry, adapted to the screen of a phone.
 Nicolas Vaughan made it in November 2026, as the Android companion of
 py-wk, the program that does the same in the terminal and on the desktop;
-the current version is 1.0.  Here I explain how it was made, in six
-stages.
+it was called *wk* in its first version, and the current one is 1.1.
+Here I explain how it was made, in seven stages.
 
-wk is free software, under the GNU General Public License, version 3 or
-later.  It uses only the Android framework and the Kotlin standard library
+Wiktionary Reader is free software, under the GNU General Public License,
+version 3 or later.  It uses only the Android framework and the Kotlin standard library
 (under the Apache License 2.0), with no other libraries.  The content of
 the entries comes from Wiktionary and its contributors, under the CC BY-SA
-4.0 licence; wk only displays it, and it is not an official project of
-Wiktionary or of the Wikimedia Foundation.
+4.0 licence; the app only displays it.  I have no association whatsoever
+with Wiktionary, Wikipedia or the Wikimedia Foundation, which runs them,
+and the app is not made, approved or endorsed by any of them; Wiktionary
+and Wikipedia are trademarks of the Wikimedia Foundation.
 
 Nicolas Vaughan is Associate Professor of Literature at the School of Arts
 and Humanities of the Universidad de los Andes, Bogotá, Colombia.
@@ -132,7 +134,7 @@ search, because the box was the only element that could take the focus.
 6. Release and F-Droid
 ----------------------
 
-I wanted wk in F-Droid, which builds each app from its source on its
+I wanted the app in F-Droid, which builds each app from its source on its
 own servers and signs it with its own key.  A few things follow from
 that.  The release build signs the APK only when it finds the key and its
 passwords in a file outside git, `keystore.properties`; without it, as
@@ -150,6 +152,24 @@ already know.  The text, the icon and the notes of the version for the
 store are in `fastlane/metadata/android/`, in English and Spanish, and
 the recipe for F-Droid's repository, in `fdroid/`.  The code went to
 GitHub and Codeberg, like py-wk, as `wk-android`.
+
+7. A new name
+-------------
+
+The first version was called *wk*, like py-wk without its prefix.  The
+name is short, but in a list of apps it says nothing, and nobody looking
+for a Wiktionary app would find it.  I wanted to call it simply
+*Wiktionary*.  That name, however, is a trademark of the Wikimedia
+Foundation, and an unofficial app with exactly that name could be taken
+for the official one; F-Droid has asked other apps to change names for
+this reason.  So the app became *Wiktionary Reader*, which says what it
+does.  Version 1.1 makes the change, and states clearly, in the About
+dialog, on the first page of the app, in the READMEs and in the
+description for F-Droid, that I have no association with Wiktionary,
+Wikipedia or the Wikimedia Foundation.  The internal names (the package
+`io.github.nivaca.wk`, the files `wk.css` and `wk.js`, the repository
+`wk-android`) did not change: users do not see them, and a new package
+would be, for Android and for F-Droid, a different app.
 
 Testing
 -------

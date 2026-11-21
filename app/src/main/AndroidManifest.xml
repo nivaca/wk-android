@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- "wk" en el menú del texto seleccionado, en cualquier app -->
+            <!-- La app en el menú del texto seleccionado, en cualquier app -->
             <intent-filter android:label="@string/lookup_label">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
                 <category android:name="android.intent.category.DEFAULT" />

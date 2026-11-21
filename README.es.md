@@ -1,13 +1,19 @@
-# wk
+# Wiktionary Reader
 
 *[Read in English](README.md)*
 
-wk es una pequeña app de Android para leer el
+Wiktionary Reader es una pequeña app de Android para leer el
 [Wiktionary en inglés](https://en.wiktionary.org). Se escribe una palabra, de cualquier
 lengua, y muestra la entrada entera: etimología, pronunciación, definiciones con sus citas,
 tablas de flexión, términos derivados, traducciones y lo demás. Es la hermana para Android
 de [py-wk](https://github.com/nivaca/py-wk), que hace lo mismo en la terminal y en el
-escritorio, y obtiene las páginas del Wiktionary de la misma manera.
+escritorio, y obtiene las páginas del Wiktionary de la misma manera. Hasta la versión 1.0 se
+llamó *wk*.
+
+**No es una app oficial.** No tengo relación alguna con Wiktionary, Wikipedia ni la
+Fundación Wikimedia, que los mantiene. Wiktionary Reader no está hecha, aprobada ni
+respaldada por ninguno de ellos; solo muestra el contenido que publica Wiktionary.
+Wiktionary y Wikipedia son marcas registradas de la Fundación Wikimedia.
 
 Soy Nicolás Vaughan (<nicolasvaughan@proton.me>) y la escribí en 2026.
 
@@ -26,7 +32,7 @@ Soy Nicolás Vaughan (<nicolasvaughan@proton.me>) y la escribí en 2026.
 - Modo claro y oscuro, según el sistema. Las tablas de flexión usan la paleta del propio
   Wiktionary, que tiene colores para ambos.
 - Desde cualquier app: se selecciona una palabra y se elige **Buscar en Wiktionary** en el
-  menú de la selección, o se comparte un texto con wk. Los enlaces a `en.wiktionary.org`
+  menú de la selección, o se comparte un texto con la app. Los enlaces a `en.wiktionary.org`
   también pueden abrirse en ella.
 - Las páginas se guardan una semana, así que una palabra ya vista se abre al instante.
 - Tamaño del texto, Abrir en el navegador, Compartir el enlace, Descargar de nuevo, Borrar
@@ -56,7 +62,7 @@ poco.
 ## Versiones y firma
 
 `./gradlew assembleRelease` produce el APK release, reducido con R8 (unos 80 KB), y lo copia
-a `dist/wk-VERSIÓN.apk`, en lugar de los anteriores. Solo sale firmado si en la raíz del
+a `dist/wiktionary-reader-VERSIÓN.apk`, en lugar de los anteriores. Solo sale firmado si en la raíz del
 proyecto está el archivo `keystore.properties`, con las claves `storeFile`, `storePassword`,
 `keyAlias` y `keyPassword`; la clave y ese archivo no están en git. Sin ellos, el APK
 release sale sin firmar, que es lo que necesita F-Droid, porque firma las apps con su propia
@@ -72,7 +78,7 @@ etiquetas.
 
 ## Cómo funciona
 
-Como py-wk, wk pide a la API REST del Wiktionary el HTML de cada página
+Como py-wk, la app pide a la API REST del Wiktionary el HTML de cada página
 (`/api/rest_v1/page/html/PALABRA`), y a la API opensearch las sugerencias. No convierte el
 HTML en texto: lo muestra en un WebView, con una hoja de estilo (`assets/wk.css`) y un script
 (`assets/wk.js`) propios, que hacen la barra de lenguas, ordenan y ocultan las lenguas y
@@ -86,7 +92,8 @@ sitio, `PageCache.kt` guarda las páginas, `Pages.kt` arma los documentos para e
 
 ## Licencia
 
-wk es software libre, bajo la Licencia Pública General de GNU, versión 3 o posterior
+Wiktionary Reader es software libre, bajo la Licencia Pública General de GNU, versión 3 o posterior
 (`GPL-3.0-or-later`); véase [LICENSE](LICENSE). El contenido de las entradas viene del
-Wiktionary y de sus colaboradores, bajo la licencia CC BY-SA 4.0. wk solo lo muestra; no es
-un proyecto del Wiktionary ni de la Fundación Wikimedia.
+Wiktionary y de sus colaboradores, bajo la licencia CC BY-SA 4.0. La app solo lo muestra y,
+como se dijo arriba, no tiene relación alguna con Wiktionary, Wikipedia ni la Fundación
+Wikimedia.

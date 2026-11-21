@@ -1,4 +1,4 @@
-<p>wk is a small app for reading the English Wiktionary. Type a word, in any language, and it shows the whole entry: etymology, pronunciation, definitions with their quotations, inflection tables, derived terms, translations and the rest.</p>
+<p>Wiktionary Reader is a small app for reading the English Wiktionary. Type a word, in any language, and it shows the whole entry: etymology, pronunciation, definitions with their quotations, inflection tables, derived terms, translations and the rest.</p>
 
 <ul>
 <li>Suggestions from Wiktionary as you type.</li>
@@ -6,8 +6,10 @@
 <li>Section titles open and close when you touch them; wide tables scroll sideways in their own box.</li>
 <li>Links to other entries open in the app, at the right language; Back returns to the previous word, where you left it.</li>
 <li>Light and dark mode, with Wiktionary's own colours for the inflection tables.</li>
-<li>From any app: select a word and choose <i>Look up in Wiktionary</i>, or share a text with wk.</li>
+<li>From any app: select a word and choose <i>Look up in Wiktionary</i>, or share a text with the app.</li>
 <li>Pages are kept for a week, so a word seen again opens at once.</li>
 </ul>
 
-<p>The app uses only the Android framework, with no trackers and no other libraries. The content of the entries comes from Wiktionary and its contributors, under the CC BY-SA 4.0 licence; wk is not a project of Wiktionary or of the Wikimedia Foundation.</p>
+<p>The app uses only the Android framework, with no trackers and no other libraries. The content of the entries comes from Wiktionary and its contributors, under the CC BY-SA 4.0 licence.</p>
+
+<p><b>Not an official app.</b> The author has no association whatsoever with Wiktionary, Wikipedia or the Wikimedia Foundation, which runs them. This app is not made, approved or endorsed by any of them. Wiktionary and Wikipedia are trademarks of the Wikimedia Foundation.</p>

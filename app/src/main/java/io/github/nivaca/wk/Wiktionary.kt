@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-// This file is part of wk. See the LICENSE file for details.
+// This file is part of Wiktionary Reader. See the LICENSE file for details.
 
 // La conversación con en.wiktionary.org: las páginas en HTML (las de
 // Parsoid, por la API REST), la búsqueda por prefijo y los enlaces.

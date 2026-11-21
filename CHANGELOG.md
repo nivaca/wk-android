@@ -1,8 +1,16 @@
 # Changelog
 
-All notable changes to wk. The source is on
+All notable changes to Wiktionary Reader (called wk in 1.0). The source is on
 [GitHub](https://github.com/nivaca/wk-android) and
 [Codeberg](https://codeberg.org/nivaca/wk-android).
+
+## 1.1 — 2026-11-21
+
+- The app is now called Wiktionary Reader (it was wk).
+- The About dialog, the first page of the app, the READMEs and the
+  description for F-Droid say that the author has no association with
+  Wiktionary, Wikipedia or the Wikimedia Foundation.
+- The signed APK in `dist/` is now `wiktionary-reader-VERSION.apk`.
 
 ## 1.0 — 2026-11-21
 

@@ -21,8 +21,8 @@ android {
         applicationId = "io.github.nivaca.wk"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     signingConfigs {
@@ -62,7 +62,7 @@ android {
 }
 
 // Al final de cada versión release firmada, el APK se copia también a
-// dist/ como wk-VERSIÓN.apk, en lugar de los anteriores, para que dist/
+// dist/ como wiktionary-reader-VERSIÓN.apk, en lugar de los anteriores, para que dist/
 // tenga siempre el más nuevo.  Sin firma (como en F-Droid) no se copia nada.
 val distApk = tasks.register("distApk") {
     doLast {
@@ -71,9 +71,9 @@ val distApk = tasks.register("distApk") {
         if (!apk.isFile) return@doLast
         val dist = rootProject.file("dist")
         dist.mkdirs()
-        dist.listFiles { f -> f.name.startsWith("wk-") && f.name.endsWith(".apk") }?.forEach { it.delete() }
-        apk.copyTo(File(dist, "wk-$version.apk"), overwrite = true)
-        println("dist/wk-$version.apk")
+        dist.listFiles { f -> (f.name.startsWith("wk-") || f.name.startsWith("wiktionary-reader-")) && f.name.endsWith(".apk") }?.forEach { it.delete() }
+        apk.copyTo(File(dist, "wiktionary-reader-$version.apk"), overwrite = true)
+        println("dist/wiktionary-reader-$version.apk")
     }
 }
 tasks.matching { it.name == "assembleRelease" }.configureEach { finalizedBy(distApk) }

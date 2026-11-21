@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-// This file is part of wk. See the LICENSE file for details.
+// This file is part of Wiktionary Reader. See the LICENSE file for details.
 
 // La única pantalla de la app: la casilla de búsqueda, con sus
 // sugerencias, y la entrada en un WebView.  Guarda el historial de las

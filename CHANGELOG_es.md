@@ -1,8 +1,16 @@
 # Cambios
 
-Los cambios de cada versión de wk. El código está en
+Los cambios de cada versión de Wiktionary Reader (wk en la 1.0). El código está en
 [GitHub](https://github.com/nivaca/wk-android) y en
 [Codeberg](https://codeberg.org/nivaca/wk-android).
+
+## 1.1 — 2026-11-21
+
+- La app se llama ahora Wiktionary Reader (antes, wk).
+- El diálogo Acerca de, la primera página de la app, los README y la
+  descripción para F-Droid dicen que el autor no tiene relación alguna con
+  Wiktionary, Wikipedia ni la Fundación Wikimedia.
+- El APK firmado de `dist/` se llama ahora `wiktionary-reader-VERSIÓN.apk`.
 
 ## 1.0 — 2026-11-21
 

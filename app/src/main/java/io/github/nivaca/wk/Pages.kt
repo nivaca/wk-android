@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-// This file is part of wk. See the LICENSE file for details.
+// This file is part of Wiktionary Reader. See the LICENSE file for details.
 
 // Los documentos que muestra el WebView: la entrada de Wiktionary con la
 // hoja de estilo y el script de la app dentro, y las páginas propias de
@@ -86,7 +86,7 @@ class Pages(context: Context) {
     /** The page shown before the first search. */
     fun welcome(): String = simple(
         "<h1>" + esc(res.getString(R.string.app_name)) + "</h1>" +
-            "<p>" + esc(res.getString(R.string.welcome)) + "</p>"
+            res.getString(R.string.welcome).split("\n\n").joinToString("") { "<p>" + esc(it) + "</p>" }
     )
 
     private fun simple(body: String) =

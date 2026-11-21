@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-// This file is part of wk. See the LICENSE file for details.
+// This file is part of Wiktionary Reader. See the LICENSE file for details.
 
 // Las páginas ya descargadas: unas pocas en memoria y, durante una semana,
 // en la carpeta de caché de la app (que Android puede vaciar cuando le
