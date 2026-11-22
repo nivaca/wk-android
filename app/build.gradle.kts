@@ -97,7 +97,25 @@ val distApk = tasks.register("distApk") {
         apk.copyTo(out, overwrite = true)
         println("dist/${out.name}")
 
-        val key = System.getenv("WK_GPG_KEY")?.takeIf { it.isNotBlank() } ?: SIGNING_KEY
+        // F-Droid compila la etiqueta vVERSIÓN y compara su APK con este
+        // (compilación reproducible); el APK guarda el commit del que sale,
+        // así que solo coincide si se compiló desde la etiqueta, sin cambios.
+        val root = rootProject.projectDir.path
+        val tag = "v$version"
+        val head = try { run("git", "-C", root, "rev-parse", "HEAD").second.trim() } catch (_: java.io.IOException) { "" }
+        val tagged = try { run("git", "-C", root, "rev-parse", "--verify", "-q", "$tag^{commit}") } catch (_: java.io.IOException) { 1 to "" }
+        val dirty = try { run("git", "-C", root, "status", "--porcelain", "--untracked-files=no").second.isNotBlank() } catch (_: java.io.IOException) { false }
+        when {
+            tagged.first != 0 ->
+                println("Note: there is no tag $tag yet; F-Droid will compare its build of $tag with the APK of that release.")
+            tagged.second.trim() != head || dirty ->
+                println("WARNING: this APK is not built from the tag $tag" +
+                        (if (dirty) " (the work tree has changes)" else "") +
+                        ", so it will not match F-Droid's build. For the release, build from $tag.")
+            else -> println("Built from the tag $tag.")
+        }
+
+        val key =System.getenv("WK_GPG_KEY")?.takeIf { it.isNotBlank() } ?: SIGNING_KEY
         val hasKey = try {
             run("gpg", "--batch", "--list-secret-keys", key).first == 0
         } catch (_: java.io.IOException) {
