@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- El diálogo de ajustes: lenguas, lo que se muestra, búsqueda, aspecto y páginas guardadas -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp">
+
+        <TextView style="@style/Wk.SettingsHeading" android:text="@string/set_languages" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/languages_help"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <EditText
+            android:id="@+id/set_languages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="la, es, Ancient Greek"
+            android:importantForAutofill="no"
+            android:inputType="text|textNoSuggestions"
+            android:maxLines="1" />
+
+        <CheckBox
+            android:id="@+id/set_only"
+            style="@style/Wk.SettingsRow"
+            android:text="@string/languages_only" />
+
+        <TextView style="@style/Wk.SettingsHeading" android:text="@string/set_entries" />
+
+        <CheckBox
+            android:id="@+id/set_quotations"
+            style="@style/Wk.SettingsRow"
+            android:text="@string/set_quotations" />
+
+        <CheckBox
+            android:id="@+id/set_tables"
+            style="@style/Wk.SettingsRow"
+            android:text="@string/set_tables" />
+
+        <CheckBox
+            android:id="@+id/set_translations"
+            style="@style/Wk.SettingsRow"
+            android:text="@string/set_close_translations" />
+
+        <CheckBox
+            android:id="@+id/set_suggestions"
+            style="@style/Wk.SettingsRow"
+            android:text="@string/set_suggestions" />
+
+        <TextView style="@style/Wk.SettingsHeading" android:text="@string/set_appearance" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="48dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/set_text_size"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <Spinner
+                android:id="@+id/set_text_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/set_theme_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:minHeight="48dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/set_theme"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <Spinner
+                android:id="@+id/set_theme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <TextView style="@style/Wk.SettingsHeading" android:text="@string/set_saved" />
+
+        <Button
+            android:id="@+id/set_clear_cache"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_clear_cache" />
+
+        <Button
+            android:id="@+id/set_clear_recent"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/set_clear_recent" />
+    </LinearLayout>
+</ScrollView>

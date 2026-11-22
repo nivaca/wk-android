@@ -19,22 +19,30 @@ I am Nicolás Vaughan (<nicolasvaughan@proton.me>), and I wrote it in 2026.
 
 ## What it does
 
-- A search box with suggestions from Wiktionary as you type.
+- A search box with suggestions from Wiktionary as you type. The first page lists your
+  recent words.
+- A bar at the bottom, after the window of py-wk: **Back** and **Forward**, as in a browser
+  (a long touch on Back lists the recent words), **Contents**, with the languages of the
+  page and their sections, and **Find in page**, with the count of matches.
+- **Quotations** and **Tables** in the menu, switched on and off at once.
+- Select any text in an entry and choose **Look up** to open it.
 - The entry, with the styles of the site adapted to a phone: wide tables scroll
   sideways in their own box, and the titles of the sections (Etymology, Noun,
   Translations …) open and close when you touch them. Translations start closed.
-- A bar at the top with the languages of the page. In **Languages…** you can give the
+- A bar at the top with the languages of the page. In **Settings…** you can give the
   ones you want first (codes or English names: `la, es, Ancient Greek`), and hide the
   others; they stay in the bar, a touch away.
 - Links to other entries open in the app, at the right language (`rosa#Latin`); links
   to anything else (appendices, Wikipedia, files) open in the browser.
 - Back returns to the previous word, where you left it.
-- Light and dark mode, following the system. The inflection tables use Wiktionary's own
+- Light and dark mode, following the system or, from Android 12, chosen in Settings. The inflection tables use Wiktionary's own
   palette, which has colours for both.
 - From any app: select a word and choose **Look up in Wiktionary** in the menu of the
   selection, or share a text with the app. Links to `en.wiktionary.org` can open in it too.
 - Pages are kept for a week, so a word seen again opens at once.
-- Text size, Open in the browser, Share the link, Download again, Delete saved pages.
+- Settings… gathers the rest: Translations open or closed, suggestions, text size, theme,
+  deleting the saved pages and forgetting the recent words. The menu also has Open in the
+  browser, Share the link and Download again.
 - English and Spanish interface.
 
 ## Requirements
@@ -57,12 +65,27 @@ Android framework (no AndroidX, no other libraries), so the build needs few down
 
 ## Releases and signing
 
-`./gradlew assembleRelease` makes the release APK, shrunk with R8 (about 80 KB), and copies
+`./gradlew assembleRelease` makes the release APK, shrunk with R8 (about 110 KB), and copies
 it to `dist/wiktionary-reader-VERSION.apk`, replacing the older ones there. It is signed only if the file
 `keystore.properties` exists in the root of the project, with the keys `storeFile`,
 `storePassword`, `keyAlias` and `keyPassword`; the key and that file are not in git. Without
 them, the release APK comes out unsigned, which is what F-Droid needs, since it signs the
 apps with its own key.
+
+The copy in `dist/` is also signed with OpenPGP, as `dist/wiktionary-reader-VERSION.apk.asc`,
+when gpg has the secret key of the project (the same as py-wk's; its public half is
+[GPG-KEY-wiktionary-reader.asc](GPG-KEY-wiktionary-reader.asc)). The variable `WK_GPG_KEY`
+names another key; without the key, the build says so and leaves only the Android signature.
+To check a release:
+
+```sh
+gpg --import GPG-KEY-wiktionary-reader.asc
+gpg --verify wiktionary-reader-VERSION.apk.asc wiktionary-reader-VERSION.apk
+apksigner verify --print-certs wiktionary-reader-VERSION.apk
+```
+
+The Android certificate's SHA-256 is
+`4f4bd72456f162f72aeec33a29d7a8487b8622eb81490dc54629ac3588661c51`.
 
 ## F-Droid
 
@@ -82,8 +105,8 @@ Parsoid leaves for editors, about a third of its size, and keeps it gzipped in t
 folder of the app.
 
 The code is in `app/src/main/java/io/github/nivaca/wk/`: `Wiktionary.kt` talks to the site,
-`PageCache.kt` keeps the pages, `Pages.kt` builds the documents for the WebView, and
-`MainActivity.kt` is the only screen. `docs/DESCRIPTION.md` tells how it was made.
+`PageCache.kt` keeps the pages, `Pages.kt` builds the documents for the WebView, `Prefs.kt`
+keeps the settings and the recent words, and `MainActivity.kt` is the only screen. `docs/DESCRIPTION.md` tells how it was made.
 
 ## License
 

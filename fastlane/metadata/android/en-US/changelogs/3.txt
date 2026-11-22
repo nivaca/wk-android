@@ -1,0 +1,1 @@
+A bottom bar with Back, Forward, Contents and Find in page. Quotations and Tables switches in the menu. Look up selected text. Recent words. One Settings dialog, with a theme choice (Android 12 or newer).

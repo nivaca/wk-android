@@ -1,7 +1,9 @@
 <p>Wiktionary Reader es una pequeña app para leer el Wiktionary en inglés. Se escribe una palabra, de cualquier lengua, y muestra la entrada entera: etimología, pronunciación, definiciones con sus citas, tablas de flexión, términos derivados, traducciones y lo demás.</p>
 
 <ul>
-<li>Sugerencias del Wiktionary mientras se escribe.</li>
+<li>Sugerencias del Wiktionary mientras se escribe, y las palabras recientes.</li>
+<li>Una barra abajo con Atrás, Adelante, Índice (las lenguas y secciones de la página) y Buscar en la página.</li>
+<li>Las citas y las tablas de flexión se apagan desde el menú; cualquier texto seleccionado en una entrada se puede buscar.</li>
 <li>Una barra con las lenguas de la página. Se indican las que se quieren primero (códigos o nombres en inglés: <i>la, es, Ancient Greek</i>) y, si se quiere, se ocultan las demás.</li>
 <li>Los títulos de las secciones se abren y se cierran al tocarlos; las tablas anchas se desplazan de lado dentro de su caja.</li>
 <li>Los enlaces a otras entradas se abren en la app, en la lengua indicada; Atrás vuelve a la palabra anterior, al punto donde se la dejó.</li>

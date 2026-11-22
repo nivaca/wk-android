@@ -59,4 +59,88 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <!-- La barra de abajo, al alcance del pulgar: atrás, adelante, índice, buscar -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/back"
+            style="@style/Wk.BarButton"
+            android:contentDescription="@string/back"
+            android:src="@drawable/ic_back" />
+
+        <ImageButton
+            android:id="@+id/forward"
+            style="@style/Wk.BarButton"
+            android:contentDescription="@string/forward"
+            android:src="@drawable/ic_forward" />
+
+        <ImageButton
+            android:id="@+id/contents"
+            style="@style/Wk.BarButton"
+            android:contentDescription="@string/contents"
+            android:src="@drawable/ic_contents" />
+
+        <ImageButton
+            android:id="@+id/find"
+            style="@style/Wk.BarButton"
+            android:contentDescription="@string/find"
+            android:src="@drawable/ic_find" />
+    </LinearLayout>
+
+    <!-- The find bar, in place of the bottom bar while it is open -->
+    <LinearLayout
+        android:id="@+id/find_bar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/find_input"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@drawable/search_field"
+            android:hint="@string/find_hint"
+            android:imeOptions="actionSearch|flagNoExtractUi"
+            android:importantForAutofill="no"
+            android:inputType="text|textNoSuggestions"
+            android:maxLines="1"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp" />
+
+        <TextView
+            android:id="@+id/find_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="56dp"
+            android:gravity="center"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <ImageButton
+            android:id="@+id/find_prev"
+            style="@style/Wk.SmallButton"
+            android:contentDescription="@string/find_previous"
+            android:src="@drawable/ic_up" />
+
+        <ImageButton
+            android:id="@+id/find_next"
+            style="@style/Wk.SmallButton"
+            android:contentDescription="@string/find_next"
+            android:src="@drawable/ic_down" />
+
+        <ImageButton
+            android:id="@+id/find_close"
+            style="@style/Wk.SmallButton"
+            android:contentDescription="@string/close"
+            android:src="@drawable/ic_close" />
+    </LinearLayout>
 </LinearLayout>

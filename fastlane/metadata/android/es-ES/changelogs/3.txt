@@ -1,0 +1,1 @@
+Una barra abajo con Atrás, Adelante, Índice y Buscar en la página. Citas y Tablas en el menú. Buscar el texto seleccionado. Palabras recientes. Un solo diálogo de Ajustes, con elección de tema (Android 12 o posterior).

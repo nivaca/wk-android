@@ -20,14 +20,23 @@ data class PageConfig(
     val target: String?,
     val scroll: Int,
     val allLabel: String,
+    val quotes: Boolean = true,
+    val tables: Boolean = true,
+    val closeTranslations: Boolean = true,
+    val anchor: String? = null,
+    val anchorOffset: Int = 0,
 ) {
     fun toJson(): String = JSONObject()
         .put("languages", JSONArray(languages))
         .put("only", only)
         .put("target", target ?: JSONObject.NULL)
         .put("scroll", scroll)
+        .put("anchor", anchor ?: JSONObject.NULL)
+        .put("anchorOffset", anchorOffset)
         .put("allLabel", allLabel)
-        .put("collapsed", JSONArray(listOf("translations")))
+        .put("quotes", quotes)
+        .put("tables", tables)
+        .put("collapsed", JSONArray(if (closeTranslations) listOf("translations") else emptyList()))
         .toString()
         // Inside a <script>, "</" could end it early.
         .replace("</", "<\\/")
@@ -83,11 +92,25 @@ class Pages(context: Context) {
             "<p><a href=\"wk:retry\">" + esc(res.getString(R.string.retry)) + "</a></p>"
     )
 
-    /** The page shown before the first search. */
-    fun welcome(): String = simple(
-        "<h1>" + esc(res.getString(R.string.app_name)) + "</h1>" +
-            res.getString(R.string.welcome).split("\n\n").joinToString("") { "<p>" + esc(it) + "</p>" }
-    )
+    /** The page shown before the first search, with the words looked up lately. */
+    fun welcome(recent: List<String>): String {
+        val body = StringBuilder()
+        body.append("<h1>").append(esc(res.getString(R.string.app_name))).append("</h1>")
+        val (intro, note) = res.getString(R.string.welcome).split("\n\n", limit = 2)
+            .let { it[0] to it.getOrNull(1) }
+        body.append("<p>").append(esc(intro)).append("</p>")
+        if (recent.isNotEmpty()) {
+            body.append("<h2>").append(esc(res.getString(R.string.menu_recent))).append("</h2>")
+            body.append("<ul class=\"wk-recent\">")
+            for (w in recent.take(15)) {
+                body.append("<li><a href=\"").append(esc(Wiktionary.pageUrl(w))).append("\">")
+                    .append(esc(w)).append("</a></li>")
+            }
+            body.append("</ul>")
+        }
+        if (note != null) body.append("<p class=\"wk-note\">").append(esc(note)).append("</p>")
+        return simple(body.toString())
+    }
 
     private fun simple(body: String) =
         "<!DOCTYPE html><html><head><meta charset=\"utf-8\">" +

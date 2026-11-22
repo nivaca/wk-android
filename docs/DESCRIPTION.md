@@ -8,8 +8,8 @@ Wiktionary Reader is a small Android app for reading the English Wiktionary
 language, and it shows the whole entry, adapted to the screen of a phone.
 Nicolas Vaughan made it in November 2026, as the Android companion of
 py-wk, the program that does the same in the terminal and on the desktop;
-it was called *wk* in its first version, and the current one is 1.1.
-Here I explain how it was made, in seven stages.
+it was called *wk* in its first version, and the current one is 1.2.
+Here I explain how it was made, in eight stages.
 
 Wiktionary Reader is free software, under the GNU General Public License,
 version 3 or later.  It uses only the Android framework and the Kotlin standard library
@@ -121,7 +121,7 @@ stylesheet sets it again.
 5. On the phone
 ---------------
 
-The emulator of the SDK did not start on my computer (it crashed at once),
+The emulator of the SDK did not start on my computer at first (it crashed at once),
 so I tried the app on a phone, a moto g55 with Android 16.  Three small
 things appeared there.  In light mode the icons of the status bar were
 white on a light background; the theme now asks for dark icons in light
@@ -171,6 +171,64 @@ Wikipedia or the Wikimedia Foundation.  The internal names (the package
 `wk-android`) did not change: users do not see them, and a new package
 would be, for Android and for F-Droid, a different app.
 
+8. The interface of py-wk, on a phone
+--------------------------------------
+
+The first versions had only the search box, the page and a menu.  For
+1.2 I took the window of py-wk as a model and asked which of its parts
+make sense on a phone.  Most of them do, in another form.
+
+The toolbar of py-wk has Back and Forward; the app had only Back, the
+button of the system.  Now a bar at the bottom, where the thumb reaches,
+has Back, Forward, Contents and Find in page.  The history works as in a
+browser: opening a new word empties what was ahead.  A long touch on
+Back lists the recent words, which the app now keeps (the last thirty)
+and also shows on its first page, where before there was only a
+greeting.
+
+The contents pane of py-wk became a list that opens from the bar.  The
+page script gives each heading a number and returns the titles, in the
+order in which the page shows them, after the languages are reordered;
+the app shows the languages in bold and their sections under them.
+Touching a title opens what hides it, the language if it was hidden and
+the sections if they were closed, and goes there.  Find in page uses
+the search of the WebView itself, with the count of matches and the
+buttons for the previous and next one, in a bar that takes the place of
+the other while it is open.
+
+py-wk can hide quotations and tables.  In the app they are two marks in
+the menu, and the change is immediate: the script only adds a class to
+`<body>`, and the stylesheet hides what that class says.  Finding what
+to hide took some care.  The quotations under a definition are list
+items, but not always with the same markup (`citation-whole` in some,
+`wiktQuote` in others), and the References use `citation-whole` too, so
+the rule hides only list items under a definition that contain a quoted
+passage.  For the tables, Wiktionary marks every inflection table with
+`data-toggle-category="inflection"`; the boxes of Translations look the
+same but are not marked, and they stay.  The sections that only hold a
+table (Declension, Conjugation) are hidden with it, so that no empty
+title remains.
+
+Double-clicking a word in py-wk looks it up.  On a phone a double touch
+is for zooming, so the app adds "Look up" at the top of the menu that
+Android shows for selected text.  The app's own item for other apps,
+"Look up in Wiktionary", appeared in that menu too, repeated; the app
+removes it there.  Last, the scattered dialogs (Languages, Text size)
+became one Settings dialog, which also has the theme: system, light or
+dark, as the moon and sun button of py-wk, but only from Android 12,
+the first version that lets an app choose its own.
+
+The releases got a second signature too.  Android checks the signature
+of an APK when it installs it, but someone who downloads the file from
+GitHub or Codeberg cannot check it before that without the tools of the
+SDK.  py-wk signs its packages with OpenPGP, and the app now does the
+same: at the end of the release build, the copy in `dist/` gets a
+detached signature (`.apk.asc`) with the same key as py-wk, if gpg has
+it, and the build checks the signature it has just made.  Without the
+key, as on F-Droid's server, it only says so.  The public key is in the
+repository, as `GPG-KEY-wiktionary-reader.asc`, and the releases carry
+it with the signature.
+
 Testing
 -------
 
@@ -186,9 +244,25 @@ while typing, a search, a link and the way back (*lupu*, *wolf*), a word
 without entry (*lupux*, with its similar titles), and the light and dark
 modes.  The release APK of version 1.1, shrunk with R8, was tried on the
 same phone too: an entry with its tables, the menu and the About dialog.
+Version 1.2 was checked the same way.  On the phone: the bottom bar,
+the contents list (with a jump into a hidden language), find in page,
+the Quotations switch, Look up on selected text, the long touch on Back,
+and the way back to the reading point after following a link.  The
+Settings dialog was checked in the emulator, which starts with the
+"swangle" graphics of the SDK instead of SwiftShader: languages, hiding
+the others, text size and theme, and the reading point kept when the
+theme changes.  These tests found four faults, all fixed before the
+release: the Look up item did not appear, a long touch on a disabled
+Back did nothing, Back returned to the wrong place (the position was
+kept in pixels), and after a change of settings the reading point
+pointed to another heading (the headings were numbered after the
+languages were reordered).  The page script was also tried in Chrome
+without a window on three entries, *amo*, *rosa* and *wolf*, which
+showed that the first rule for hiding quotations missed most of them.
 The build has no warnings from the Kotlin compiler.
 
-The project has 26 files of its own (code, resources and build scripts,
-without the Gradle wrapper and the documentation), with about 1400
-lines: 800 of Kotlin in four files, 140 of JavaScript and 120 of CSS; the
-rest is XML and Gradle.  The debug APK weighs 2.7 MB.
+The project has 36 files of its own (code, resources and build scripts,
+without the Gradle wrapper and the documentation), with about 1900
+lines: 1100 of Kotlin in five files, 190 of JavaScript and 140 of CSS;
+the rest is XML and Gradle.  The release APK weighs 107 KB, the debug
+one 2.7 MB.

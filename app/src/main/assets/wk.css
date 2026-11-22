@@ -112,7 +112,27 @@ table { border-collapse: collapse; }
 .floatright, .tright, figure[typeof~="mw:File/Thumb"] { float: none !important; margin: 0.6em 0 !important; }
 figure[typeof~="mw:File/Thumb"] img { max-width: min(100%, 260px); }
 
+/* Quotations and tables, when the app switches them off.  Only the
+   quotations under the definitions: References use the same markup. */
+.wk-no-quotes ol > li ul > li:has(.e-quotation, > .citation-whole, > .wiktQuote, .h-quotation),
+.wk-no-quotes ol > li dd:has(> .h-quotation) { display: none !important; }
+.wk-no-tables .wk-table-section,
+.wk-no-tables [data-toggle-category="inflection"],
+.wk-no-tables .NavFrame:has([data-toggle-category="inflection"]) { display: none !important; }
+
 /* Pages that are not entries: missing words and errors. */
 .wk-message { padding-top: 1.2em; }
 .wk-message h1 { font: 600 1.4em/1.3 serif; }
 .wk-message li { margin: 0.4em 0; font-size: 1.05em; }
+.wk-message h2 { font: 600 1.1em/1.3 sans-serif; border: none; margin-top: 1.6em; }
+.wk-recent { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.wk-recent li { margin: 0; }
+.wk-recent a {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--wk-line);
+  border-radius: 16px;
+  background: var(--wk-chip);
+  color: var(--wk-text);
+}
+.wk-note { color: var(--wk-muted); font-size: 0.9em; margin-top: 2em; }

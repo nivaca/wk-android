@@ -33,6 +33,14 @@
     return wanted.length;
   }
 
+  // Every heading gets a number of its own, for the contents list and the
+  // reading point.  They are given in the page's own order, before the
+  // languages are reordered, so that a number always means the same
+  // heading, whatever the settings.
+  Array.prototype.forEach.call(
+    document.querySelectorAll("body > section > h2, section > h3, section > h4, section > h5"),
+    function (h, i) { h.setAttribute("data-wk", i); });
+
   // Las lenguas preferidas van primero, en el orden de los ajustes (sort
   // es estable, así que las demás conservan el orden de la página).
   if (wanted.length && langs.length) {
@@ -105,8 +113,31 @@
     box.appendChild(t);
   });
 
-  // Called by the app for links into this same page ("#Latin", "#Etymology_2").
+  // Secciones de tablas de flexión: con "Tables" apagado se ocultan enteras,
+  // no solo la tabla, para que no quede un título vacío.
+  var TABLE_SECTIONS = ["declension", "conjugation", "inflection", "mutation"];
+  Array.prototype.forEach.call(document.querySelectorAll("section > .wk-fold"), function (h) {
+    if (TABLE_SECTIONS.indexOf(norm(h.textContent)) >= 0) h.parentNode.classList.add("wk-table-section");
+  });
+
+  // Quotations and tables can be switched off; the app changes these
+  // classes of <body> without loading the page again.
+  document.body.classList.toggle("wk-no-quotes", cfg.quotes === false);
+  document.body.classList.toggle("wk-no-tables", cfg.tables === false);
+
+  // Abre todo lo que esconde a [el]: su lengua, si estaba oculta, y las
+  // secciones plegadas que lo contienen.
+  function uncover(el) {
+    var sec = el.closest("body > section");
+    if (sec) sec.classList.remove("wk-hidden");
+    for (var p = el.closest("section.wk-closed"); p; p = p.parentNode.closest("section.wk-closed")) {
+      p.classList.remove("wk-closed");
+    }
+    refreshBar();
+  }
+
   window.wk = {
+    // Called by the app for links into this same page ("#Latin", "#Etymology_2").
     show: function (frag) {
       if (!frag) return;
       var w = norm(frag);
@@ -114,23 +145,84 @@
       if (l) { reveal(l); return; }
       var el = document.getElementById(frag.replace(/ /g, "_"));
       if (!el) return;
-      var sec = el.closest("body > section");
-      if (sec) sec.classList.remove("wk-hidden");
-      for (var p = el.closest("section.wk-closed"); p; p = p.parentNode.closest("section.wk-closed")) {
-        p.classList.remove("wk-closed");
-      }
-      refreshBar();
+      uncover(el);
       el.scrollIntoView();
+    },
+    // La lista de títulos para el índice: [nivel, texto, id], en el orden
+    // en que se ven (las lenguas ya reordenadas).
+    outline: function () {
+      var out = [];
+      Array.prototype.forEach.call(
+        document.querySelectorAll("body > section > h2, section > h3, section > h4, section > h5"),
+        function (h) {
+          var sec = h.parentNode;
+          if (sec.classList.contains("wk-table-section") && document.body.classList.contains("wk-no-tables")) return;
+          out.push([Number(h.tagName.charAt(1)), h.textContent.trim(), h.getAttribute("data-wk"),
+                    !!sec.closest(".wk-hidden")]);
+        });
+      return JSON.stringify(out);
+    },
+    go: function (id) {
+      var h = document.querySelector('[data-wk="' + id + '"]');
+      if (!h) return;
+      uncover(h);
+      h.parentNode.classList.remove("wk-closed");
+      h.scrollIntoView();
+    },
+    set: function (option, on) {
+      document.body.classList.toggle("wk-no-" + option, !on);
+    },
+    // The text selected in the page, for "Look up".
+    selection: function () {
+      return String(window.getSelection() || "").trim();
     }
   };
 
+  // El punto de lectura, como el último título visible que quedó por
+  // encima del borde de arriba y la distancia a él.  Se le pasa a la app
+  // mientras se desplaza la página (cada 300 ms como mucho), para volver
+  // aquí con Atrás aunque lo de arriba cambie de altura al cargar.
+  function anchorNow() {
+    var best = null;
+    var all = document.querySelectorAll("[data-wk]");
+    for (var i = 0; i < all.length; i++) {
+      var h = all[i];
+      if (h.offsetParent === null) continue;
+      if (h.getBoundingClientRect().top > 1) break;
+      best = h;
+    }
+    return best ? [best.getAttribute("data-wk"), Math.round(best.getBoundingClientRect().top)] : null;
+  }
+  var pending = false;
+  window.addEventListener("scroll", function () {
+    if (pending || !window.WkBridge) return;
+    pending = true;
+    setTimeout(function () {
+      pending = false;
+      var a = anchorNow();
+      window.WkBridge.anchor(a ? a[0] : "", a ? a[1] : 0);
+    }, 300);
+  }, { passive: true });
+
+  function restore() {
+    var h = cfg.anchor ? document.querySelector('[data-wk="' + cfg.anchor + '"]') : null;
+    if (h) {
+      uncover(h);
+      h.parentNode.classList.remove("wk-closed");
+      window.scrollTo(0, h.getBoundingClientRect().top + window.scrollY - (cfg.anchorOffset || 0));
+    } else if (cfg.scroll) {
+      window.scrollTo(0, cfg.scroll);
+    }
+  }
+
   // Al volver atrás, la página vuelve adonde estaba; otra vez cuando
-  // terminan de cargar las imágenes, que cambian la altura de lo de arriba.
+  // terminan de cargar las imágenes, por si cambió la altura de lo de arriba.
   if (cfg.target) window.wk.show(cfg.target);
-  else if (cfg.scroll) {
-    window.scrollTo(0, cfg.scroll);
+  else if (cfg.anchor || cfg.scroll) {
+    restore();
+    var start = window.scrollY;
     window.addEventListener("load", function () {
-      if (window.scrollY < cfg.scroll + 50) window.scrollTo(0, cfg.scroll);
+      if (Math.abs(window.scrollY - start) < 50) restore();
     });
   }
 })();

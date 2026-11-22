@@ -21,8 +21,8 @@ android {
         applicationId = "io.github.nivaca.wk"
         minSdk = 29
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
     }
 
     signingConfigs {
@@ -62,8 +62,26 @@ android {
 }
 
 // Al final de cada versión release firmada, el APK se copia también a
-// dist/ como wiktionary-reader-VERSIÓN.apk, en lugar de los anteriores, para que dist/
-// tenga siempre el más nuevo.  Sin firma (como en F-Droid) no se copia nada.
+// dist/ como wiktionary-reader-VERSIÓN.apk, en lugar de los anteriores,
+// para que dist/ tenga siempre el más nuevo.  Sin firma (como en F-Droid)
+// no se copia nada.
+//
+// Además, si gpg tiene la clave secreta del proyecto, el APK de dist/
+// lleva una firma OpenPGP aparte (.apk.asc), como los paquetes de py-wk.
+// La clave es SIGNING_KEY, o la que diga la variable WK_GPG_KEY; gpg pide
+// su contraseña (o la toma de gpg-agent, si la recuerda).  Sin la clave,
+// el APK queda solo con su firma de Android.
+
+// The project's OpenPGP key (Nicolas Vaughan, ed25519, 2026), the same
+// as py-wk's; its public half is GPG-KEY-wiktionary-reader.asc.
+val SIGNING_KEY = "81870643CA221AF90C30554EBE6832CD35994948"
+
+fun run(vararg command: String): Pair<Int, String> {
+    val p = ProcessBuilder(*command).redirectErrorStream(true).start()
+    val out = p.inputStream.bufferedReader().readText()
+    return p.waitFor() to out
+}
+
 val distApk = tasks.register("distApk") {
     doLast {
         val version = android.defaultConfig.versionName
@@ -71,9 +89,30 @@ val distApk = tasks.register("distApk") {
         if (!apk.isFile) return@doLast
         val dist = rootProject.file("dist")
         dist.mkdirs()
-        dist.listFiles { f -> (f.name.startsWith("wk-") || f.name.startsWith("wiktionary-reader-")) && f.name.endsWith(".apk") }?.forEach { it.delete() }
-        apk.copyTo(File(dist, "wiktionary-reader-$version.apk"), overwrite = true)
-        println("dist/wiktionary-reader-$version.apk")
+        dist.listFiles { f ->
+            (f.name.startsWith("wk-") || f.name.startsWith("wiktionary-reader-")) &&
+                (f.name.endsWith(".apk") || f.name.endsWith(".apk.asc"))
+        }?.forEach { it.delete() }
+        val out = File(dist, "wiktionary-reader-$version.apk")
+        apk.copyTo(out, overwrite = true)
+        println("dist/${out.name}")
+
+        val key = System.getenv("WK_GPG_KEY")?.takeIf { it.isNotBlank() } ?: SIGNING_KEY
+        val hasKey = try {
+            run("gpg", "--batch", "--list-secret-keys", key).first == 0
+        } catch (_: java.io.IOException) {
+            false                                  // no gpg at all
+        }
+        if (!hasKey) {
+            println("Not signed with OpenPGP: gpg has no secret key $key")
+            return@doLast
+        }
+        val (code, text) = run("gpg", "--batch", "--yes", "--armor", "--local-user", key,
+                                "--detach-sign", out.path)
+        if (code != 0) throw GradleException("gpg could not sign ${out.name}:\n$text")
+        val (ok, check) = run("gpg", "--batch", "--verify", out.path + ".asc", out.path)
+        if (ok != 0) throw GradleException("the signature of ${out.name} does not verify:\n$check")
+        println("dist/${out.name}.asc")
     }
 }
 tasks.matching { it.name == "assembleRelease" }.configureEach { finalizedBy(distApk) }
