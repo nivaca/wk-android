@@ -259,7 +259,12 @@ pointed to another heading (the headings were numbered after the
 languages were reordered).  The page script was also tried in Chrome
 without a window on three entries, *amo*, *rosa* and *wolf*, which
 showed that the first rule for hiding quotations missed most of them.
-The build has no warnings from the Kotlin compiler.
+Before submitting the app to F-Droid, I ran F-Droid's own build of
+version 1.2 on my computer, in its build container
+(`fdroidserver:buildserver-trixie`), the same steps as the checks of
+F-Droid's repository: its scanner found nothing, and the app was built
+from the tag `v1.2`.  The screenshots of the store were taken in the
+emulator.  The build has no warnings from the Kotlin compiler.
 
 The project has 36 files of its own (code, resources and build scripts,
 without the Gradle wrapper and the documentation), with about 1900
