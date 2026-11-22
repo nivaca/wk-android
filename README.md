@@ -69,8 +69,7 @@ Android framework (no AndroidX, no other libraries), so the build needs few down
 it to `dist/wiktionary-reader-VERSION.apk`, replacing the older ones there. It is signed only if the file
 `keystore.properties` exists in the root of the project, with the keys `storeFile`,
 `storePassword`, `keyAlias` and `keyPassword`; the key and that file are not in git. Without
-them, the release APK comes out unsigned, which is what F-Droid needs, since it signs the
-apps with its own key.
+them, the release APK comes out unsigned, as on F-Droid's build server.
 
 The copy in `dist/` is also signed with OpenPGP, as `dist/wiktionary-reader-VERSION.apk.asc`,
 when gpg has the secret key of the project (the same as py-wk's; its public half is
@@ -93,6 +92,12 @@ The description, the icon and the notes of each version for F-Droid are in
 `fastlane/metadata/android/` (in English and Spanish), where F-Droid looks for them. The
 build recipe for the F-Droid repository is `fdroid/io.github.nivaca.wk.yml`: it builds the
 tag `vVERSION` from the folder `app`, and finds new versions by their tags.
+
+The build is reproducible. F-Droid builds each version itself, compares the result with the
+signed APK of the GitHub release, and, if they are the same apart from the signature,
+publishes that APK with its original signature. So the F-Droid version and the one from the
+releases are the same app, and either one updates the other. For this, the release APK must
+be built from the tagged commit, because the APK records the commit it was built from.
 
 ## How it works
 

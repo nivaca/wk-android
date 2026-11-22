@@ -73,8 +73,7 @@ poco.
 a `dist/wiktionary-reader-VERSIÓN.apk`, en lugar de los anteriores. Solo sale firmado si en la raíz del
 proyecto está el archivo `keystore.properties`, con las claves `storeFile`, `storePassword`,
 `keyAlias` y `keyPassword`; la clave y ese archivo no están en git. Sin ellos, el APK
-release sale sin firmar, que es lo que necesita F-Droid, porque firma las apps con su propia
-clave.
+release sale sin firmar, como en el servidor de compilación de F-Droid.
 
 La copia de `dist/` lleva además una firma OpenPGP, `dist/wiktionary-reader-VERSIÓN.apk.asc`,
 cuando gpg tiene la clave secreta del proyecto (la misma de py-wk; su parte pública es
@@ -98,6 +97,13 @@ La descripción, el icono y las notas de cada versión para F-Droid están en
 compilación para el repositorio de F-Droid es `fdroid/io.github.nivaca.wk.yml`: compila la
 etiqueta `vVERSIÓN` desde la carpeta `app` y encuentra las versiones nuevas por sus
 etiquetas.
+
+La compilación es reproducible. F-Droid compila cada versión por su cuenta, compara el
+resultado con el APK firmado de la versión publicada en GitHub y, si son iguales salvo la
+firma, publica ese APK con su firma original. Así, la versión de F-Droid y la de las
+publicaciones son la misma app, y cualquiera de las dos actualiza a la otra. Para eso, el APK
+release se ha de compilar desde el commit de la etiqueta, porque el APK guarda el commit del
+que salió.
 
 ## Cómo funciona
 
