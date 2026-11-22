@@ -12,7 +12,8 @@ AutoName: Wiktionary Reader
 
 RepoType: git
 Repo: https://github.com/nivaca/wk-android.git
-Binaries: https://github.com/nivaca/wk-android/releases/download/v%v/wiktionary-reader-%v.apk
+Binaries: 
+  https://github.com/nivaca/wk-android/releases/download/v%v/wiktionary-reader-%v.apk
 
 Builds:
   - versionName: '1.2'
