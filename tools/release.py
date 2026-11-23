@@ -1,0 +1,361 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""Publica una versión nueva de Wiktionary Reader en GitHub (con gh) y en
+Codeberg (con tea), con lo que se haya escrito en los registros de cambios
+bajo «Unreleased» y «Sin publicar».
+
+    python3 tools/release.py [--version X.Y] [--dry-run] [--yes]
+
+En orden:
+
+1. comprueba que el repositorio esté en main, sin nada por confirmar; que
+   gh, tea y gpg estén instalados, con la clave de OpenPGP del proyecto en
+   el llavero; que exista keystore.properties, y que CHANGELOG.md tenga una
+   sección «## Unreleased» y CHANGELOG_es.md una «## Sin publicar», no
+   vacías;
+2. elige la versión: la de --version, o la siguiente (1.2 → 1.3), con
+   versionCode uno más;
+3. pone la versión en app/build.gradle.kts, en los títulos de esas dos
+   secciones (con la fecha de hoy) y en los documentos de docs/;
+4. confirma los cambios («vX.Y») y pone la etiqueta firmada vX.Y;
+5. compila el APK firmado desde esa etiqueta (./gradlew clean
+   assembleRelease, que lo copia a dist/ con su firma de OpenPGP; gpg
+   pide la frase de paso).  F-Droid compara su compilación con este APK,
+   que guarda el commit del que sale, así que debe salir de la etiqueta.
+   Si la compilación falla, quita la etiqueta y la confirmación;
+6. sube main y la etiqueta a origin (que sube a GitHub y a Codeberg) y
+   crea la versión en cada forja, con el APK, su firma y la clave pública;
+   las notas salen del registro de cambios.
+
+Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
+pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 6,
+correr el script de nuevo publica lo que falte: HEAD ya tiene la etiqueta
+de la versión de app/build.gradle.kts.
+"""
+
+import argparse
+import datetime
+import hashlib
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GRADLE = os.path.join('app', 'build.gradle.kts')
+PUBLIC_KEY = 'GPG-KEY-wiktionary-reader.asc'
+BRANCH = 'main'
+REPO = 'nivaca/wk-android'
+TEA_LOGIN = 'codeberg'
+PENDING = {'CHANGELOG.md': 'Unreleased', 'CHANGELOG_es.md': 'Sin publicar'}
+
+DESCRIPTION = ('Release a new version of Wiktionary Reader on GitHub and '
+               'Codeberg, from the "Unreleased" sections of the changelogs.')
+
+
+def run(*command, check=True, capture=True, cwd=ROOT) -> str:
+    out = subprocess.run(command, cwd=cwd, text=True,
+                         capture_output=capture)
+    if check and out.returncode != 0:
+        detail = (out.stderr or out.stdout or '').strip() if capture else ''
+        sys.exit(f'release: {shlex.join(command)} failed'
+                 + (f': {detail}' if detail else ''))
+    return (out.stdout or '').strip() if capture else ''
+
+
+def ok(*command, cwd=ROOT) -> bool:
+    return subprocess.run(command, cwd=cwd, capture_output=True
+                          ).returncode == 0
+
+
+def read(path: str) -> str:
+    with open(os.path.join(ROOT, path), encoding='utf-8') as f:
+        return f.read()
+
+
+def write(path: str, text: str):
+    with open(os.path.join(ROOT, path), 'w', encoding='utf-8') as f:
+        f.write(text)
+
+
+def substitute(path: str, pattern: str, replacement: str):
+    """Replace PATTERN in PATH once; stop if it is not there, since then
+    the text changed and this script must change with it."""
+    text, n = re.subn(pattern, replacement, read(path), count=1,
+                      flags=re.MULTILINE)
+    if n == 0:
+        sys.exit(f'release: {path}: did not find /{pattern}/')
+    write(path, text)
+
+
+def section(path: str, heading: str) -> str:
+    """The text under '## HEADING' up to the next '## ', or ''."""
+    m = re.search(rf'^## {re.escape(heading)}\n(.*?)(?=^## |\Z)', read(path),
+                  re.MULTILINE | re.DOTALL)
+    return m[1].strip() if m else ''
+
+
+def heading(name: str) -> str:
+    # El título de la versión en CHANGELOG.md: «1.3 — FECHA»
+    m = re.search(rf'^## ({re.escape(name)} — .*)$', read('CHANGELOG.md'),
+                  re.MULTILINE)
+    if not m:
+        sys.exit(f'release: CHANGELOG.md has no section for {name}')
+    return m[1]
+
+
+def signing_key() -> str:
+    # La misma clave que usa distApk: WK_GPG_KEY, o la fijada en Gradle.
+    key = os.environ.get('WK_GPG_KEY', '').strip()
+    if key:
+        return key
+    m = re.search(r'val SIGNING_KEY = "([0-9A-F]{40})"', read(GRADLE))
+    if not m:
+        sys.exit(f'release: no SIGNING_KEY in {GRADLE}')
+    return m[1]
+
+
+def app_version() -> tuple[int, str]:
+    text = read(GRADLE)
+    code = re.search(r'versionCode = (\d+)', text)
+    name = re.search(r'versionName = "([\d.]+)"', text)
+    if not code or not name:
+        sys.exit(f'release: no versionCode or versionName in {GRADLE}')
+    return int(code[1]), name[1]
+
+
+def apksigner() -> str:
+    """apksigner of the newest build-tools of the SDK."""
+    sdk = os.environ.get('ANDROID_HOME', '')
+    if os.path.isfile(os.path.join(ROOT, 'local.properties')):
+        m = re.search(r'^sdk\.dir=(.+)$', read('local.properties'),
+                      re.MULTILINE)
+        sdk = m[1].strip() if m else sdk
+    tools = os.path.join(sdk, 'build-tools')
+    versions = sorted((v for v in os.listdir(tools) if re.fullmatch(
+        r'[\d.]+', v)), key=lambda v: tuple(map(int, v.split('.')))
+    ) if sdk and os.path.isdir(tools) else []
+    for v in reversed(versions):
+        found = os.path.join(tools, v, 'apksigner')
+        if os.path.isfile(found):
+            return found
+    sys.exit('release: no apksigner in the build-tools of the SDK')
+
+
+def spaced(fingerprint: str) -> str:
+    # 8187 0643 … 3599 4948, con dos espacios en medio, como en gpg
+    groups = [fingerprint[i:i + 4] for i in range(0, 40, 4)]
+    return ' '.join(groups[:5]) + '  ' + ' '.join(groups[5:])
+
+
+class Release:
+
+    def __init__(self, args):
+        self.args = args
+        self.key = ''
+
+    def check(self, resuming: bool):
+        for tool in ('git', 'gh', 'tea', 'gpg'):
+            if not shutil.which(tool):
+                sys.exit(f'release: {tool} is not installed')
+        if not os.path.isfile(os.path.join(ROOT, 'keystore.properties')):
+            sys.exit('release: there is no keystore.properties, so the APK '
+                     'would not be signed (see the README)')
+        self.key = signing_key()
+        if not ok('gpg', '--batch', '--list-secret-keys', self.key):
+            sys.exit(f"release: the gpg key {self.key} is not in this "
+                     "machine's keyring")
+        branch = run('git', 'rev-parse', '--abbrev-ref', 'HEAD')
+        if branch != BRANCH:
+            sys.exit(f'release: on branch {branch}, not {BRANCH}')
+        if run('git', 'status', '--porcelain'):
+            message = 'there are changes not committed (see git status)'
+            if not self.args.dry_run:
+                sys.exit(f'release: {message}')
+            print(f'release: (dry run) {message}', file=sys.stderr)
+        if resuming:
+            return
+        for path, heading in PENDING.items():
+            if not section(path, heading):
+                sys.exit(f'release: {path} has no "## {heading}" section, or '
+                         'it is empty: write there what is new first')
+
+    # Notas ---------------------------------------------------------------
+
+    def notes(self, name: str, apk: str) -> str:
+        with open(os.path.join(ROOT, apk), 'rb') as f:
+            sha = hashlib.sha256(f.read()).hexdigest()
+        cert = re.search(r'certificate SHA-256 digest: ([0-9a-f]{64})', run(
+            apksigner(), 'verify', '--print-certs', apk))
+        if not cert:
+            sys.exit(f'release: apksigner shows no certificate in {apk}')
+        # Cada punto de la lista, en una sola línea.
+        what = re.sub(r'\n  +', ' ', section('CHANGELOG.md', heading(name)))
+        return f'''\
+Wiktionary Reader is a small Android app for reading the English \
+Wiktionary: you type a word, in any language, and it shows the whole entry, \
+with its inflection tables, adapted to the phone. It needs Android 10 or newer.
+
+What is new in {name}:
+
+{what}
+
+**Not an official app.** I have no association whatsoever with Wiktionary, \
+Wikipedia or the Wikimedia Foundation, which runs them. The app is not made, \
+approved or endorsed by any of them; it only shows the content of Wiktionary \
+(CC BY-SA 4.0). Wiktionary and Wikipedia are trademarks of the Wikimedia \
+Foundation.
+
+**Install:** download `wiktionary-reader-{name}.apk` and open it on the \
+phone; it updates the earlier versions in place. To get each new version by \
+itself, add this repository to Obtainium.
+
+**Verify:**
+
+```
+SHA-256 of the APK:            {sha}
+SHA-256 of the signing cert:   {cert[1]}
+```
+
+`apksigner verify --print-certs wiktionary-reader-{name}.apk` shows the \
+second one.
+
+The APK is also signed with OpenPGP, with the same key as py-wk \
+(`{spaced(self.key)}`). Import the key once and check the signature:
+
+```
+gpg --import {PUBLIC_KEY}
+gpg --verify wiktionary-reader-{name}.apk.asc wiktionary-reader-{name}.apk
+```
+
+Free software, under the GNU General Public License, version 3 or later.
+'''
+
+    # Pasos -------------------------------------------------------------
+
+    def edit(self, code: int, name: str):
+        today = datetime.date.today().isoformat()
+        substitute(GRADLE, r'versionCode = \d+', f'versionCode = {code}')
+        substitute(GRADLE, r'versionName = "[\d.]+"',
+                   f'versionName = "{name}"')
+        for path, heading in PENDING.items():
+            substitute(path, rf'^## {re.escape(heading)}$',
+                       f'## {name} — {today}')
+        substitute('docs/DESCRIPTION.md', r'the current one is [\d.]+\.',
+                   f'the current one is {name}.')
+        substitute('docs/DESCRIPCIÓN_es.md',
+                   r'^# Wiktionary Reader [\d.]+: descripción',
+                   f'# Wiktionary Reader {name}: descripción')
+        run('git', 'add', GRADLE, *PENDING, 'docs/DESCRIPTION.md',
+            'docs/DESCRIPCIÓN_es.md')
+        run('git', 'commit', '--quiet', '--message', f'v{name}')
+        run('git', 'tag', '--sign', '--local-user', self.key, '--message',
+            f'Wiktionary Reader {name}', f'v{name}', capture=False)
+
+    def build(self) -> bool:
+        return subprocess.run([os.path.join(ROOT, 'gradlew'), 'clean',
+                               'assembleRelease'], cwd=ROOT).returncode == 0
+
+    def publish(self, name: str):
+        tag = f'v{name}'
+        apk = os.path.join('dist', f'wiktionary-reader-{name}.apk')
+        files = [apk, apk + '.asc', PUBLIC_KEY]
+        for f in files:
+            if not os.path.isfile(os.path.join(ROOT, f)):
+                sys.exit(f'release: there is no {f}')
+        run('git', 'push', 'origin', BRANCH, capture=False)
+        run('git', 'push', 'origin', f'refs/tags/{tag}', capture=False)
+        title = f'Wiktionary Reader {name}'
+        with tempfile.TemporaryDirectory() as tmp:
+            notes = os.path.join(tmp, 'notes.md')
+            with open(notes, 'w', encoding='utf-8') as f:
+                f.write(self.notes(name, apk))
+            if ok('gh', 'release', 'view', tag, '--repo', REPO):
+                print(f'GitHub: {tag} is already released')
+            else:
+                run('gh', 'release', 'create', tag, *files, '--repo', REPO,
+                    '--title', title, '--notes-file', notes, '--verify-tag',
+                    capture=False)
+            # tea, dentro del repositorio, toma el remoto de GitHub aunque
+            # se le dé --repo; por eso corre en otra carpeta, con rutas
+            # absolutas.
+            where = ['--repo', REPO, '--login', TEA_LOGIN]
+            listed = run('tea', 'releases', 'ls', *where, '--output',
+                         'simple', cwd=tmp)
+            if re.search(rf'^{re.escape(tag)}\b', listed, re.MULTILINE):
+                print(f'Codeberg: {tag} is already released')
+            else:
+                assets = [a for f in files
+                          for a in ('--asset', os.path.join(ROOT, f))]
+                run('tea', 'releases', 'create', *where, '--tag', tag,
+                    '--title', title, '--note-file', notes, *assets,
+                    capture=False, cwd=tmp)
+        print(f'\nReleased Wiktionary Reader {name}.')
+
+    def ask(self, text: str):
+        print(text)
+        if self.args.dry_run:
+            sys.exit(0)
+        if not self.args.yes:
+            answer = input('Go on? [y/N] ').strip().lower()
+            if answer not in ('y', 'yes', 's', 'sí', 'si'):
+                sys.exit('Nothing done.')
+
+    def __call__(self):
+        code, name = app_version()
+        tagged = run('git', 'rev-parse', '--verify', '--quiet',
+                     f'refs/tags/v{name}^{{commit}}', check=False)
+        head = run('git', 'rev-parse', 'HEAD')
+        if tagged == head and not ok('gh', 'release', 'view', f'v{name}',
+                                     '--repo', REPO):
+            # Una vez anterior se detuvo después de etiquetar.
+            self.check(resuming=True)
+            self.ask(f'v{name} is tagged but not released: build it if '
+                     'needed, push it and release it.')
+            apk = os.path.join(ROOT, 'dist', f'wiktionary-reader-{name}.apk')
+            if not os.path.isfile(apk) and not self.build():
+                sys.exit('release: the build failed')
+            self.publish(name)
+            return
+        self.check(resuming=False)
+        if self.args.version:
+            new = self.args.version
+            if tuple(map(int, new.split('.'))) <= tuple(
+                    map(int, name.split('.'))):
+                sys.exit(f'release: {new} is not newer than {name}')
+        else:
+            major, minor = name.split('.')[:2]
+            new = f'{major}.{int(minor) + 1}'
+        if ok('git', 'rev-parse', '--verify', '--quiet', f'refs/tags/v{new}'):
+            sys.exit(f'release: the tag v{new} already exists')
+        self.ask(f'Wiktionary Reader {name} → {new} (versionCode {code + 1}), '
+                 'with the "Unreleased" notes.\nCommit, tag, build the signed '
+                 'APK from the tag, push to origin, and release on GitHub '
+                 'and Codeberg.')
+        self.edit(code + 1, new)
+        if not self.build():
+            # Solo se deshace lo que hizo este script: el árbol estaba limpio.
+            run('git', 'tag', '--delete', f'v{new}', check=False)
+            run('git', 'reset', '--quiet', '--hard', 'HEAD~1', check=False)
+            sys.exit('release: the build failed; the commit and the tag are '
+                     'undone')
+        self.publish(new)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog='tools/release.py',
+                                     description=DESCRIPTION)
+    parser.add_argument('--version', metavar='X.Y',
+                        help='the new version (default: the next minor one)')
+    parser.add_argument('-n', '--dry-run', action='store_true',
+                        help='only say what would be done')
+    parser.add_argument('-y', '--yes', action='store_true',
+                        help='do not ask before doing it')
+    Release(parser.parse_args(argv))()
+
+
+if __name__ == '__main__':
+    main()

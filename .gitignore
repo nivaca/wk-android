@@ -13,3 +13,5 @@ keystore.properties
 *~
 # Los APK firmados (los hace assembleRelease)
 dist/
+# Python (tools/)
+__pycache__/

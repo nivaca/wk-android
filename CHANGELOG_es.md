@@ -4,6 +4,13 @@ Los cambios de cada versión de Wiktionary Reader (wk en la 1.0). El código est
 [GitHub](https://github.com/nivaca/wk-android) y en
 [Codeberg](https://codeberg.org/nivaca/wk-android).
 
+## Sin publicar
+
+- `tools/release.py` publica una versión con una orden: sube la versión,
+  confirma, firma la etiqueta, compila desde ella el APK y crea las
+  versiones en GitHub y en Codeberg, con las notas de este registro. Las
+  notas dicen cómo recibir cada versión nueva sola con Obtainium.
+
 ## 1.2 — 2026-11-21
 
 Cambios en la interfaz, a partir de la ventana de py-wk:

@@ -9,7 +9,7 @@ language, and it shows the whole entry, adapted to the screen of a phone.
 Nicolas Vaughan made it in November 2026, as the Android companion of
 py-wk, the program that does the same in the terminal and on the desktop;
 it was called *wk* in its first version, and the current one is 1.2.
-Here I explain how it was made, in eight stages.
+Here I explain how it was made, in nine stages.
 
 Wiktionary Reader is free software, under the GNU General Public License,
 version 3 or later.  It uses only the Android framework and the Kotlin standard library
@@ -229,6 +229,30 @@ key, as on F-Droid's server, it only says so.  The public key is in the
 repository, as `GPG-KEY-wiktionary-reader.asc`, and the releases carry
 it with the signature.
 
+9. A release in one command
+---------------------------
+
+Each release had the same steps: raise `versionCode` and `versionName`,
+date the changelogs, commit, sign the tag, build the APK from that tag,
+push to both forges, and write the release on each, with the checksums
+and the commands to verify them.  It is a long list for a small change,
+and the order matters: the APK must come from the tagged commit, or it
+does not match F-Droid's build.  So I wrote `tools/release.py`, which
+does all of it.  What is new I write first, by hand, under "Unreleased"
+in the two changelogs; the script refuses to run without it, since a
+release without notes is not worth making.
+
+The script commits and tags before building, because of the
+reproducible build.  If the build fails, it removes its own tag and its
+own commit; the tree was clean before, so nothing else is lost.  It
+reads the checksum of the certificate with `apksigner`, not `keytool`,
+which cannot read an APK signed only with the newer schemes.  On
+Codeberg it runs `tea` from a temporary folder, because inside the
+repository `tea` takes the GitHub remote even when it is given the
+repository.  If a run stops after the tag, the next run finds the tag on
+HEAD without a release, and publishes it.  On the phone, Obtainium can
+follow the releases of GitHub and install each new APK over the old one.
+
 Testing
 -------
 
@@ -273,4 +297,10 @@ The project has 36 files of its own (code, resources and build scripts,
 without the Gradle wrapper and the documentation), with about 1900
 lines: 1100 of Kotlin in five files, 190 of JavaScript and 140 of CSS;
 the rest is XML and Gradle.  The release APK weighs 107 KB, the debug
-one 2.7 MB.
+one 2.7 MB.  Besides those, `tools/release.py` has 361 lines of Python.
+
+I tried `tools/release.py` in a clone of the repository, apart from the
+real one: without an "Unreleased" section (it stops), with one and
+`--dry-run`, with an older `--version` (it refuses), the edits, the
+commit and the tag themselves, whose diff I read, the release notes, and
+a second run after the tag, which offers to publish it.

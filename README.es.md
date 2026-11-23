@@ -90,6 +90,26 @@ apksigner verify --print-certs wiktionary-reader-VERSIÓN.apk
 El SHA-256 del certificado de Android es
 `4f4bd72456f162f72aeec33a29d7a8487b8622eb81490dc54629ac3588661c51`.
 
+Una versión nueva se publica con una orden, después de escribir lo nuevo bajo
+`## Unreleased` en `CHANGELOG.md` y bajo `## Sin publicar` en `CHANGELOG_es.md`:
+
+```sh
+python3 tools/release.py [--version X.Y] [--dry-run] [--yes]
+```
+
+Sube `versionCode` y `versionName` (de 1.2 a 1.3, salvo que `--version` diga otra), da a
+esas dos secciones la versión y la fecha de hoy, y pone la versión en `docs/`. Confirma
+(`vX.Y`), firma la etiqueta y compila desde ella el APK firmado, como pide F-Droid; si la
+compilación falla, deshace la confirmación y la etiqueta. Luego sube `main` y la etiqueta a
+`origin` (GitHub y Codeberg) y crea la versión en cada forja, con el APK, su `.asc` y la
+clave pública, y con las notas tomadas del registro de cambios. Pregunta antes de cambiar
+nada, y `--dry-run` solo dice qué haría. Necesita `gh`, `tea`, `gpg` con la clave del
+proyecto, `main` sin cambios por confirmar y `keystore.properties`. Si se detiene después de
+etiquetar, correrlo de nuevo publica lo que falte.
+
+En el teléfono, [Obtainium](https://github.com/ImranR98/Obtainium) puede seguir las
+versiones de este repositorio e instalar cada APK nuevo sobre el anterior.
+
 ## F-Droid
 
 La descripción, el icono y las notas de cada versión para F-Droid están en

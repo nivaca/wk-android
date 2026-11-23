@@ -4,6 +4,13 @@ All notable changes to Wiktionary Reader (called wk in 1.0). The source is on
 [GitHub](https://github.com/nivaca/wk-android) and
 [Codeberg](https://codeberg.org/nivaca/wk-android).
 
+## Unreleased
+
+- `tools/release.py` publishes a version in one command: it raises the
+  version, commits, signs the tag, builds the APK from it and makes the
+  releases on GitHub and Codeberg, with the notes of this changelog. The
+  notes say how to get each new version by itself with Obtainium.
+
 ## 1.2 — 2026-11-21
 
 Changes to the interface, after the window of py-wk:
