@@ -34,8 +34,10 @@ En orden:
 
 Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
 pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 7,
-correr el script de nuevo publica lo que falte: HEAD ya tiene la etiqueta
-de la versión de app/build.gradle.kts.
+correr el script de nuevo publica lo que falte: la versión de
+app/build.gradle.kts ya tiene su etiqueta.  Lo mismo vale para una versión
+publicada sin alguno de sus archivos en una de las forjas: se le añaden,
+si los que ya tiene en GitHub son los de dist/.
 """
 
 import argparse
@@ -325,15 +327,19 @@ Free software, under the GNU General Public License, version 3 or later.
         return subprocess.run([os.path.join(ROOT, 'gradlew'), 'clean',
                                'assembleRelease'], cwd=ROOT).returncode == 0
 
+    def files(self, name: str) -> list[str]:
+        apk = os.path.join('dist', f'wiktionary-reader-{name}.apk')
+        return [apk, apk + '.asc', SUMS, SUMS + '.asc', PUBLIC_KEY]
+
     def publish(self, name: str):
         tag = f'v{name}'
-        apk = os.path.join('dist', f'wiktionary-reader-{name}.apk')
+        apk = self.files(name)[0]
         for f in (apk, apk + '.asc', PUBLIC_KEY):
             if not os.path.isfile(os.path.join(ROOT, f)):
                 sys.exit(f'release: there is no {f}')
         self.sums(apk)
         self.verify(tag, [apk, SUMS])
-        files = [apk, apk + '.asc', SUMS, SUMS + '.asc', PUBLIC_KEY]
+        files = self.files(name)
         run('git', 'push', 'origin', BRANCH, capture=False)
         run('git', 'push', 'origin', f'refs/tags/{tag}', capture=False)
         title = f'Wiktionary Reader {name}'
@@ -341,8 +347,8 @@ Free software, under the GNU General Public License, version 3 or later.
             notes = os.path.join(tmp, 'notes.md')
             with open(notes, 'w', encoding='utf-8') as f:
                 f.write(self.notes(name, apk))
-            if ok('gh', 'release', 'view', tag, '--repo', REPO):
-                print(f'GitHub: {tag} is already released')
+            if self.github_assets(tag) is not None:
+                self.add_missing_github(tag, files)
             else:
                 run('gh', 'release', 'create', tag, *files, '--repo', REPO,
                     '--title', title, '--notes-file', notes, '--verify-tag',
@@ -351,10 +357,8 @@ Free software, under the GNU General Public License, version 3 or later.
             # se le dé --repo; por eso corre en otra carpeta, con rutas
             # absolutas.
             where = ['--repo', REPO, '--login', TEA_LOGIN]
-            listed = run('tea', 'releases', 'ls', *where, '--output',
-                         'simple', cwd=tmp)
-            if re.search(rf'^{re.escape(tag)}\b', listed, re.MULTILINE):
-                print(f'Codeberg: {tag} is already released')
+            if self.codeberg_assets(tag) is not None:
+                self.add_missing_codeberg(tag, files)
             else:
                 assets = [a for f in files
                           for a in ('--asset', os.path.join(ROOT, f))]
@@ -362,6 +366,72 @@ Free software, under the GNU General Public License, version 3 or later.
                     '--title', title, '--note-file', notes, *assets,
                     capture=False, cwd=tmp)
         print(f'\nReleased Wiktionary Reader {name}.')
+
+    # Una versión ya publicada ------------------------------------------
+
+    def github_assets(self, tag: str) -> dict | None:
+        """{name: 'sha256:…'} of the files of the release TAG on GitHub,
+        or None if there is no such release."""
+        if not ok('gh', 'release', 'view', tag, '--repo', REPO):
+            return None
+        return dict(line.split(' ', 1) for line in run(
+            'gh', 'release', 'view', tag, '--repo', REPO, '--json', 'assets',
+            '--jq', '.assets[] | "\\(.name) \\(.digest)"').splitlines()
+            if line)
+
+    def codeberg_assets(self, tag: str) -> set | None:
+        """The names of the files of the release TAG on Codeberg, or None
+        if there is no such release."""
+        where = ['--repo', REPO, '--login', TEA_LOGIN]
+        # (tea corre fuera del repositorio; véase publish)
+        with tempfile.TemporaryDirectory() as tmp:
+            listed = run('tea', 'releases', 'ls', *where, '--output',
+                         'simple', cwd=tmp)
+            if not re.search(rf'^{re.escape(tag)}\b', listed, re.MULTILINE):
+                return None
+            return set(re.findall(r'\S+', run(
+                'tea', 'releases', 'assets', 'ls', *where, '--output',
+                'simple', tag, cwd=tmp)))
+
+    def incomplete(self, name: str) -> bool:
+        """Whether vNAME lacks a release, or a file, on either forge."""
+        names = [os.path.basename(f) for f in self.files(name)]
+        github = self.github_assets(f'v{name}')
+        codeberg = self.codeberg_assets(f'v{name}')
+        return github is None or codeberg is None or any(
+            n not in github or n not in codeberg for n in names)
+
+    def add_missing_github(self, tag: str, files: list[str]):
+        """Upload to a release already made the files it lacks, if the
+        ones it has are those in dist/."""
+        have = self.github_assets(tag) or {}
+        for f in files:
+            digest = have.get(os.path.basename(f))
+            if digest and digest != f'sha256:{sha256(f)}':
+                sys.exit(f'release: GitHub {tag} has another '
+                         f'{os.path.basename(f)} than {f}: nothing added')
+        missing = [f for f in files if os.path.basename(f) not in have]
+        if not missing:
+            print(f'GitHub: {tag} is already released')
+            return
+        run('gh', 'release', 'upload', tag, *missing, '--repo', REPO,
+            capture=False)
+        print(f'GitHub: added to {tag}: '
+              + ', '.join(os.path.basename(f) for f in missing))
+
+    def add_missing_codeberg(self, tag: str, files: list[str]):
+        have = self.codeberg_assets(tag) or set()
+        missing = [f for f in files if os.path.basename(f) not in have]
+        if not missing:
+            print(f'Codeberg: {tag} is already released')
+            return
+        with tempfile.TemporaryDirectory() as tmp:
+            run('tea', 'releases', 'assets', 'create', '--repo', REPO,
+                '--login', TEA_LOGIN, tag,
+                *(os.path.join(ROOT, f) for f in missing), capture=False,
+                cwd=tmp)
+        print(f'Codeberg: added to {tag}: '
+              + ', '.join(os.path.basename(f) for f in missing))
 
     def ask(self, text: str):
         print(text)
@@ -377,15 +447,23 @@ Free software, under the GNU General Public License, version 3 or later.
         tagged = run('git', 'rev-parse', '--verify', '--quiet',
                      f'refs/tags/v{name}^{{commit}}', check=False)
         head = run('git', 'rev-parse', 'HEAD')
-        if tagged == head and not ok('gh', 'release', 'view', f'v{name}',
-                                     '--repo', REPO):
-            # Una vez anterior se detuvo después de etiquetar.
+        if tagged and self.incomplete(name):
+            # Una vez anterior se detuvo después de etiquetar, o la versión
+            # se publicó sin alguno de sus archivos (SHA256SUMS, antes de
+            # que el script lo hiciera).
             self.check(resuming=True)
-            self.ask(f'v{name} is tagged but not released: build it if '
-                     'needed, push it and release it.')
-            apk = os.path.join(ROOT, 'dist', f'wiktionary-reader-{name}.apk')
-            if not os.path.isfile(apk) and not self.build():
-                sys.exit('release: the build failed')
+            self.ask(f'v{name} is tagged but not released on both forges '
+                     'with all its files: build it if needed, push it and '
+                     'release what is missing.')
+            apk = os.path.join(ROOT, self.files(name)[0])
+            if not os.path.isfile(apk):
+                # El APK debe salir de la etiqueta (compilación reproducible).
+                if tagged != head:
+                    sys.exit(f'release: there is no {self.files(name)[0]}, '
+                             f'and HEAD is not v{name}, from which it must '
+                             'be built')
+                if not self.build():
+                    sys.exit('release: the build failed')
             self.publish(name)
             return
         self.check(resuming=False)
