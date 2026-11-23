@@ -4,7 +4,7 @@ All notable changes to Wiktionary Reader (called wk in 1.0). The source is on
 [GitHub](https://github.com/nivaca/wk-android) and
 [Codeberg](https://codeberg.org/nivaca/wk-android).
 
-## Unreleased
+## 1.3 — 2026-11-22
 
 - `tools/release.py` publishes a version in one command: it raises the
   version, commits, signs the tag, builds the APK from it and makes the

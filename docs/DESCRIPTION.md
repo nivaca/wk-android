@@ -8,7 +8,7 @@ Wiktionary Reader is a small Android app for reading the English Wiktionary
 language, and it shows the whole entry, adapted to the screen of a phone.
 Nicolas Vaughan made it in November 2026, as the Android companion of
 py-wk, the program that does the same in the terminal and on the desktop;
-it was called *wk* in its first version, and the current one is 1.2.
+it was called *wk* in its first version, and the current one is 1.3.
 Here I explain how it was made, in nine stages.
 
 Wiktionary Reader is free software, under the GNU General Public License,
