@@ -107,7 +107,8 @@ etiqueta a `origin` (GitHub y Codeberg) y crea la versión en cada forja, con el
 `SHA256SUMS`, sus `.asc` y la clave pública, y con las notas tomadas del registro de cambios. Pregunta antes de cambiar
 nada, y `--dry-run` solo dice qué haría. Necesita `gh`, `tea`, `gpg` con la clave del
 proyecto, `main` sin cambios por confirmar y `keystore.properties`. Si se detiene después de
-etiquetar, correrlo de nuevo publica lo que falte.
+etiquetar, correrlo de nuevo publica lo que falte; a una versión a la que le falte un archivo
+en alguna de las dos forjas se lo añade, si los que tiene en GitHub son los de `dist/`.
 
 En el teléfono, [Obtainium](https://github.com/ImranR98/Obtainium) puede seguir las
 versiones de este repositorio e instalar cada APK nuevo sobre el anterior.

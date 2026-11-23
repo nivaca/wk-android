@@ -103,7 +103,8 @@ public key; if one fails, nothing is published. Then it pushes `main` and the ta
 `SHA256SUMS`, their `.asc` and the public key, with notes taken from the changelog. It asks before changing anything,
 and `--dry-run` only says what it would do. It needs `gh`, `tea`, `gpg` with the key of the
 project, a clean `main` and `keystore.properties`. If it stops after tagging, running it
-again publishes what is missing.
+again publishes what is missing; a release that lacks a file on either forge gets it, if the
+files it has on GitHub are those in `dist/`.
 
 On the phone, [Obtainium](https://github.com/ImranR98/Obtainium) can watch the releases of
 this repository and install each new APK over the old one.
