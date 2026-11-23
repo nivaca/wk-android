@@ -96,9 +96,11 @@ python3 tools/release.py [--version X.Y] [--dry-run] [--yes]
 It raises `versionCode` and `versionName` (1.2 to 1.3, unless `--version` says otherwise),
 gives those two sections the version and today's date, and puts the version in `docs/`. It
 commits (`vX.Y`), signs the tag, and builds the signed APK from the tag, as F-Droid needs; if
-the build fails, it undoes the commit and the tag. Then it pushes `main` and the tag to
-`origin` (GitHub and Codeberg) and makes the release on each forge with the APK, its `.asc`
-and the public key, with notes taken from the changelog. It asks before changing anything,
+the build fails, it undoes the commit and the tag. It writes `dist/SHA256SUMS` and its signature
+`SHA256SUMS.asc`, and checks every signature, and the tag's, as a user would, with only the
+public key; if one fails, nothing is published. Then it pushes `main` and the tag to
+`origin` (GitHub and Codeberg) and makes the release on each forge with the APK,
+`SHA256SUMS`, their `.asc` and the public key, with notes taken from the changelog. It asks before changing anything,
 and `--dry-run` only says what it would do. It needs `gh`, `tea`, `gpg` with the key of the
 project, a clean `main` and `keystore.properties`. If it stops after tagging, running it
 again publishes what is missing.

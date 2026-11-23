@@ -23,12 +23,17 @@ En orden:
    pide la frase de paso).  F-Droid compara su compilación con este APK,
    que guarda el commit del que sale, así que debe salir de la etiqueta.
    Si la compilación falla, quita la etiqueta y la confirmación;
-6. sube main y la etiqueta a origin (que sube a GitHub y a Codeberg) y
-   crea la versión en cada forja, con el APK, su firma y la clave pública;
-   las notas salen del registro de cambios.
+6. escribe dist/SHA256SUMS (el SHA-256 del APK, como lo lee
+   `sha256sum -c`) y su firma SHA256SUMS.asc, y comprueba las firmas como
+   lo haría quien baja la versión: en un GNUPGHOME temporal que solo tiene
+   la clave pública del proyecto; comprueba también la etiqueta (git tag
+   --verify).  Si algo no se verifica, se detiene sin publicar nada;
+7. sube main y la etiqueta a origin (que sube a GitHub y a Codeberg) y
+   crea la versión en cada forja, con el APK, SHA256SUMS, sus firmas y la
+   clave pública; las notas salen del registro de cambios.
 
 Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
-pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 6,
+pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 7,
 correr el script de nuevo publica lo que falte: HEAD ya tiene la etiqueta
 de la versión de app/build.gradle.kts.
 """
@@ -50,6 +55,7 @@ PUBLIC_KEY = 'GPG-KEY-wiktionary-reader.asc'
 BRANCH = 'main'
 REPO = 'nivaca/wk-android'
 TEA_LOGIN = 'codeberg'
+SUMS = os.path.join('dist', 'SHA256SUMS')
 PENDING = {'CHANGELOG.md': 'Unreleased', 'CHANGELOG_es.md': 'Sin publicar'}
 
 DESCRIPTION = ('Release a new version of Wiktionary Reader on GitHub and '
@@ -116,6 +122,14 @@ def signing_key() -> str:
     if not m:
         sys.exit(f'release: no SIGNING_KEY in {GRADLE}')
     return m[1]
+
+
+def sha256(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(os.path.join(ROOT, path), 'rb') as f:
+        for block in iter(lambda: f.read(1 << 20), b''):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def app_version() -> tuple[int, str]:
@@ -186,8 +200,7 @@ class Release:
     # Notas ---------------------------------------------------------------
 
     def notes(self, name: str, apk: str) -> str:
-        with open(os.path.join(ROOT, apk), 'rb') as f:
-            sha = hashlib.sha256(f.read()).hexdigest()
+        sha = sha256(apk)
         cert = re.search(r'certificate SHA-256 digest: ([0-9a-f]{64})', run(
             apksigner(), 'verify', '--print-certs', apk))
         if not cert:
@@ -231,6 +244,16 @@ gpg --import {PUBLIC_KEY}
 gpg --verify wiktionary-reader-{name}.apk.asc wiktionary-reader-{name}.apk
 ```
 
+`SHA256SUMS` has the same SHA-256 of the APK, and `SHA256SUMS.asc` is its \
+signature, with the same key:
+
+```
+gpg --verify SHA256SUMS.asc SHA256SUMS
+sha256sum -c SHA256SUMS
+```
+
+The tag `{'v' + name}` is signed with the same key.
+
 Free software, under the GNU General Public License, version 3 or later.
 '''
 
@@ -255,6 +278,49 @@ Free software, under the GNU General Public License, version 3 or later.
         run('git', 'tag', '--sign', '--local-user', self.key, '--message',
             f'Wiktionary Reader {name}', f'v{name}', capture=False)
 
+    def sums(self, apk: str):
+        """Write SUMS for APK and sign it, unless it is already there,
+        signed, for this same APK (a run that stopped half-way)."""
+        text = f'{sha256(apk)}  {os.path.basename(apk)}\n'
+        path = os.path.join(ROOT, SUMS)
+        if os.path.isfile(path + '.asc') and os.path.isfile(path) and \
+                read(SUMS) == text:
+            return
+        write(SUMS, text)
+        run('gpg', '--batch', '--yes', '--armor', '--local-user', self.key,
+            '--detach-sign', '--output', path + '.asc', path, capture=False)
+
+    def verify(self, tag: str, signed: list[str]):
+        """Stop unless every signature verifies as a user would check it:
+        with only the published public key."""
+        failed = []
+        with tempfile.TemporaryDirectory(prefix='wk-release-') as home:
+            # gpg quiere su carpeta solo para el usuario.
+            os.chmod(home, 0o700)
+            env = {**os.environ, 'GNUPGHOME': home}
+            subprocess.run(['gpg', '--batch', '--quiet', '--import',
+                            os.path.join(ROOT, PUBLIC_KEY)], env=env,
+                           capture_output=True, check=True)
+            for f in signed:
+                done = subprocess.run(
+                    ['gpg', '--batch', '--verify', f + '.asc', f], cwd=ROOT,
+                    env=env, capture_output=True, text=True)
+                if done.returncode != 0:
+                    failed.append(f)
+            done = subprocess.run(['git', 'tag', '--verify', tag], cwd=ROOT,
+                                  env=env, capture_output=True, text=True)
+            if done.returncode != 0:
+                failed.append(f'the tag {tag}')
+            # Un GNUPGHOME nuevo puede arrancar gpg-agent o keyboxd: se
+            # detienen antes de borrar la carpeta.
+            subprocess.run(['gpgconf', '--kill', 'all'], env=env,
+                           capture_output=True)
+        if failed:
+            sys.exit('release: these do not verify with ' + PUBLIC_KEY
+                     + ': ' + ', '.join(failed) + '; nothing was published')
+        print('Verified with ' + PUBLIC_KEY + ': ' + ', '.join(
+            os.path.basename(f) for f in signed) + f', the tag {tag}')
+
     def build(self) -> bool:
         return subprocess.run([os.path.join(ROOT, 'gradlew'), 'clean',
                                'assembleRelease'], cwd=ROOT).returncode == 0
@@ -262,10 +328,12 @@ Free software, under the GNU General Public License, version 3 or later.
     def publish(self, name: str):
         tag = f'v{name}'
         apk = os.path.join('dist', f'wiktionary-reader-{name}.apk')
-        files = [apk, apk + '.asc', PUBLIC_KEY]
-        for f in files:
+        for f in (apk, apk + '.asc', PUBLIC_KEY):
             if not os.path.isfile(os.path.join(ROOT, f)):
                 sys.exit(f'release: there is no {f}')
+        self.sums(apk)
+        self.verify(tag, [apk, SUMS])
+        files = [apk, apk + '.asc', SUMS, SUMS + '.asc', PUBLIC_KEY]
         run('git', 'push', 'origin', BRANCH, capture=False)
         run('git', 'push', 'origin', f'refs/tags/{tag}', capture=False)
         title = f'Wiktionary Reader {name}'

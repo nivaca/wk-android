@@ -100,9 +100,11 @@ python3 tools/release.py [--version X.Y] [--dry-run] [--yes]
 Sube `versionCode` y `versionName` (de 1.2 a 1.3, salvo que `--version` diga otra), da a
 esas dos secciones la versión y la fecha de hoy, y pone la versión en `docs/`. Confirma
 (`vX.Y`), firma la etiqueta y compila desde ella el APK firmado, como pide F-Droid; si la
-compilación falla, deshace la confirmación y la etiqueta. Luego sube `main` y la etiqueta a
-`origin` (GitHub y Codeberg) y crea la versión en cada forja, con el APK, su `.asc` y la
-clave pública, y con las notas tomadas del registro de cambios. Pregunta antes de cambiar
+compilación falla, deshace la confirmación y la etiqueta. Escribe `dist/SHA256SUMS` y su
+firma `SHA256SUMS.asc`, y comprueba todas las firmas, y la de la etiqueta, como lo haría un
+usuario, solo con la clave pública; si una falla, no publica nada. Luego sube `main` y la
+etiqueta a `origin` (GitHub y Codeberg) y crea la versión en cada forja, con el APK,
+`SHA256SUMS`, sus `.asc` y la clave pública, y con las notas tomadas del registro de cambios. Pregunta antes de cambiar
 nada, y `--dry-run` solo dice qué haría. Necesita `gh`, `tea`, `gpg` con la clave del
 proyecto, `main` sin cambios por confirmar y `keystore.properties`. Si se detiene después de
 etiquetar, correrlo de nuevo publica lo que falte.

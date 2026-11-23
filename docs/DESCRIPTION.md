@@ -253,6 +253,12 @@ repository.  If a run stops after the tag, the next run finds the tag on
 HEAD without a release, and publishes it.  On the phone, Obtainium can
 follow the releases of GitHub and install each new APK over the old one.
 
+Later the script learnt to write `SHA256SUMS` for the APK and to sign it,
+as my other projects do.  Before it pushes anything, it checks each
+signature and the signed tag in a temporary `GNUPGHOME` that holds only
+the public key, the way someone who downloads the release would check
+them; a signature that does not verify stops it before publishing.
+
 Testing
 -------
 
@@ -297,10 +303,15 @@ The project has 36 files of its own (code, resources and build scripts,
 without the Gradle wrapper and the documentation), with about 1900
 lines: 1100 of Kotlin in five files, 190 of JavaScript and 140 of CSS;
 the rest is XML and Gradle.  The release APK weighs 107 KB, the debug
-one 2.7 MB.  Besides those, `tools/release.py` has 361 lines of Python.
+one 2.7 MB.  Besides those, `tools/release.py` has 429 lines of Python.
 
 I tried `tools/release.py` in a clone of the repository, apart from the
 real one: without an "Unreleased" section (it stops), with one and
 `--dry-run`, with an older `--version` (it refuses), the edits, the
 commit and the tag themselves, whose diff I read, the release notes, and
-a second run after the tag, which offers to publish it.
+a second run after the tag, which offers to publish it.  The part that
+writes `SHA256SUMS` I tried with a throwaway key in a temporary
+`GNUPGHOME`, never the project's: the sums pass `sha256sum -c`, a second
+run reuses the signature, and an APK changed after signing stops the
+release.  With the real public key it verifies the APK and the tag of
+1.3.
