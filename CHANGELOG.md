@@ -4,7 +4,7 @@ All notable changes to Wiktionary Reader (called wk in 1.0). The source is on
 [GitHub](https://github.com/nivaca/wk-android) and
 [Codeberg](https://codeberg.org/nivaca/wk-android).
 
-## Unreleased
+## 1.4 — 2026-11-23
 
 - Each release also carries `SHA256SUMS`, with the SHA-256 of the APK,
   and its OpenPGP signature `SHA256SUMS.asc`. Before publishing,

@@ -4,7 +4,7 @@ Los cambios de cada versión de Wiktionary Reader (wk en la 1.0). El código est
 [GitHub](https://github.com/nivaca/wk-android) y en
 [Codeberg](https://codeberg.org/nivaca/wk-android).
 
-## Sin publicar
+## 1.4 — 2026-11-23
 
 - Cada versión lleva también `SHA256SUMS`, con el SHA-256 del APK, y su
   firma OpenPGP `SHA256SUMS.asc`. Antes de publicar, `tools/release.py`

@@ -1,4 +1,4 @@
-# Wiktionary Reader 1.3: descripción
+# Wiktionary Reader 1.4: descripción
 
 *[Read in English](DESCRIPTION.md)*
 
