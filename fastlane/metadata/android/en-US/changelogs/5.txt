@@ -1,0 +1,1 @@
+• Each release also carries SHA256SUMS, with the SHA-256 of the APK, and its OpenPGP signature SHA256SUMS.asc. Before publishing, tools/release.py checks every signature and the signed tag with only the public key, as a user would, and stops if one fails.

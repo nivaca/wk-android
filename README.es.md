@@ -31,6 +31,12 @@ Obtainium está instalado (el enlace pasa por la página de redirección de Obta
 analítica); sin ella, la app se añade a mano en Obtainium con la dirección
 `https://github.com/nivaca/wk-android`.
 
+También está en mi propio repositorio de F-Droid, con los mismos APK firmados, así que cada
+uno actualiza al otro: en F-Droid (o Droid-ify, Neo Store) se añade el repositorio
+`https://nivaca.codeberg.page/fdroid/repo`, cuya clave tiene la huella
+`E930B855E234BD2DE4F083D454DA0195549005D91A89309F9A3E5510D71E2E46`;
+la página <https://nivaca.codeberg.page/fdroid/> lo añade de un toque.
+
 ## Qué hace
 
 - Una casilla de búsqueda con sugerencias del Wiktionary mientras se escribe. La primera

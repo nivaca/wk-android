@@ -16,7 +16,9 @@ En orden:
 2. elige la versión: la de --version, o la siguiente (1.2 → 1.3), con
    versionCode uno más;
 3. pone la versión en app/build.gradle.kts, en los títulos de esas dos
-   secciones (con la fecha de hoy) y en los documentos de docs/;
+   secciones (con la fecha de hoy) y en los documentos de docs/, y
+   escribe con tools/store_notes.py las notas de la versión para las
+   tiendas (fastlane/metadata/android/*/changelogs/VERSIONCODE.txt);
 4. confirma los cambios («vX.Y») y pone la etiqueta firmada vX.Y;
 5. compila el APK firmado desde esa etiqueta (./gradlew clean
    assembleRelease, que lo copia a dist/ con su firma de OpenPGP; gpg
@@ -30,7 +32,10 @@ En orden:
    --verify).  Si algo no se verifica, se detiene sin publicar nada;
 7. sube main y la etiqueta a origin (que sube a GitHub y a Codeberg) y
    crea la versión en cada forja, con el APK, SHA256SUMS, sus firmas y la
-   clave pública; las notas salen del registro de cambios.
+   clave pública; las notas salen del registro de cambios.  Al final pone
+   el APK nuevo en el repositorio de F-Droid propio y lo publica
+   (../fdroid-repo/tools/update.py --publish), si ese proyecto está junto
+   a este; si falla, solo avisa, porque la versión ya está publicada.
 
 Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
 pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 7,
@@ -51,6 +56,8 @@ import subprocess
 import sys
 import tempfile
 
+import store_notes              # (tools/, junto a este script)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GRADLE = os.path.join('app', 'build.gradle.kts')
 PUBLIC_KEY = 'GPG-KEY-wiktionary-reader.asc'
@@ -58,6 +65,9 @@ BRANCH = 'main'
 REPO = 'nivaca/wk-android'
 TEA_LOGIN = 'codeberg'
 SUMS = os.path.join('dist', 'SHA256SUMS')
+# The own F-Droid repository, next to this project: after each release it
+# gets the new APK (its tools/update.py checks it and publishes the site).
+FDROID_REPO = os.path.join(os.path.dirname(ROOT), 'fdroid-repo')
 PENDING = {'CHANGELOG.md': 'Unreleased', 'CHANGELOG_es.md': 'Sin publicar'}
 
 DESCRIPTION = ('Release a new version of Wiktionary Reader on GitHub and '
@@ -124,6 +134,22 @@ def signing_key() -> str:
     if not m:
         sys.exit(f'release: no SIGNING_KEY in {GRADLE}')
     return m[1]
+
+
+def update_fdroid_repo():
+    """Puts the new APK in the own F-Droid repository and publishes it, if
+    that project is next to this one.  The release is already made, so a
+    failure here only warns."""
+    script = os.path.join(FDROID_REPO, 'tools', 'update.py')
+    if not os.path.isfile(script):
+        print(f'(There is no {FDROID_REPO}: the F-Droid repository is not '
+              'updated.)')
+        return
+    print('\nUpdating the F-Droid repository…', flush=True)
+    if subprocess.run([sys.executable, script, '--publish', '--yes'],
+                      cwd=FDROID_REPO).returncode != 0:
+        print('release: the release is made, but the F-Droid repository is '
+              f'not updated; run python3 {script} --publish', file=sys.stderr)
 
 
 def sha256(path: str) -> str:
@@ -274,8 +300,10 @@ Free software, under the GNU General Public License, version 3 or later.
         substitute('docs/DESCRIPCIÓN_es.md',
                    r'^# Wiktionary Reader [\d.]+: descripción',
                    f'# Wiktionary Reader {name}: descripción')
+        # Las notas de la versión para las tiendas, del registro de cambios.
+        notes = store_notes.write(code, name, force=True)
         run('git', 'add', GRADLE, *PENDING, 'docs/DESCRIPTION.md',
-            'docs/DESCRIPCIÓN_es.md')
+            'docs/DESCRIPCIÓN_es.md', *notes)
         run('git', 'commit', '--quiet', '--message', f'v{name}')
         run('git', 'tag', '--sign', '--local-user', self.key, '--message',
             f'Wiktionary Reader {name}', f'v{name}', capture=False)
@@ -366,6 +394,7 @@ Free software, under the GNU General Public License, version 3 or later.
                     '--title', title, '--note-file', notes, *assets,
                     capture=False, cwd=tmp)
         print(f'\nReleased Wiktionary Reader {name}.')
+        update_fdroid_repo()
 
     # Una versión ya publicada ------------------------------------------
 

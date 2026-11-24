@@ -9,7 +9,7 @@ language, and it shows the whole entry, adapted to the screen of a phone.
 Nicolas Vaughan made it in November 2026, as the Android companion of
 py-wk, the program that does the same in the terminal and on the desktop;
 it was called *wk* in its first version, and the current one is 1.4.
-Here I explain how it was made, in nine stages.
+Here I explain how it was made, in ten stages.
 
 Wiktionary Reader is free software, under the GNU General Public License,
 version 3 or later.  It uses only the Android framework and the Kotlin standard library
@@ -261,6 +261,37 @@ them; a signature that does not verify stops it before publishing.  A
 release already made that lacks a file on either forge gets it on the
 next run, if the files it has on GitHub are the same as those in
 `dist/`; the script of py-words for Android does the same.
+
+10. Where to get it
+-------------------
+
+Up to here the only way to get the app was a release: download the APK,
+or let Obtainium follow the releases. The READMEs got an "Installing"
+section with a badge that adds the app to Obtainium in one touch; the
+link passes through Obtainium's own redirect page, which has analytics,
+so the README says so and gives the address to add by hand.
+
+Then a repository of my own for F-Droid, `fdroid-repo`, a project next
+to the two apps and published on Codeberg Pages
+(<https://nivaca.codeberg.page/fdroid/repo>). It offers the same signed
+APKs as the releases, so the repository, the releases and Obtainium
+update one another; its script checks each APK against the release and
+its signatures before adding it. F-Droid's main repository builds from
+source and signs with its own key, and it builds Wiktionary Reader
+reproducibly, so its version and mine are the same app; the repository
+of my own adds what py-words needs, an APK that carries a prebuilt
+Python.
+
+Two things joined the release script. It writes the notes of each
+version for the stores,
+`fastlane/metadata/android/*/changelogs/VERSIONCODE.txt`, from the entry
+in the changelogs (`tools/store_notes.py`: plain text, one line per
+item, within F-Droid's 500 characters); until then they had stopped at
+1.2, and F-Droid showed no "What's new". The notes of 1.3 and 1.4 were
+written the same way, afterwards. And at the end of a release it runs
+the repository's `tools/update.py --publish`, so that F-Droid users get
+the new version too; if that fails, it only warns, since the release is
+already made.
 
 Testing
 -------

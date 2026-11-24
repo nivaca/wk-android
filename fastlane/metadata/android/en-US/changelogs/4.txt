@@ -1,0 +1,1 @@
+• tools/release.py publishes a version in one command: it raises the version, commits, signs the tag, builds the APK from it and makes the releases on GitHub and Codeberg, with the notes of this changelog. The notes say how to get each new version by itself with Obtainium.

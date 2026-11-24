@@ -31,6 +31,12 @@ Obtainium is installed (the link passes through Obtainium's own redirect page, w
 analytics); without it, add the app in Obtainium by hand, with the address
 `https://github.com/nivaca/wk-android`.
 
+It is also in my own F-Droid repository, with the same signed APKs, so each one updates the
+other: in F-Droid (or Droid-ify, Neo Store), add the repository
+`https://nivaca.codeberg.page/fdroid/repo`, whose key has the fingerprint
+`E930B855E234BD2DE4F083D454DA0195549005D91A89309F9A3E5510D71E2E46`;
+the page <https://nivaca.codeberg.page/fdroid/> adds it in one touch.
+
 ## What it does
 
 - A search box with suggestions from Wiktionary as you type. The first page lists your
