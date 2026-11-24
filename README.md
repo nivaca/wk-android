@@ -140,6 +140,11 @@ publishes that APK with its original signature. So the F-Droid version and the o
 releases are the same app, and either one updates the other. For this, the release APK must
 be built from the tagged commit, because the APK records the commit it was built from.
 
+The notes of each version are written by the release script, from the changelogs
+(`tools/store_notes.py`). The app is also in my own F-Droid repository (see "Installing"),
+with the same signed APKs as the releases; the release script publishes each new version
+there. Its source is [nivaca/fdroid](https://codeberg.org/nivaca/fdroid) on Codeberg.
+
 ## How it works
 
 Like py-wk, the app asks Wiktionary's REST API for the HTML of a page

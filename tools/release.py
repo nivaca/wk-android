@@ -252,7 +252,9 @@ Foundation.
 
 **Install:** download `wiktionary-reader-{name}.apk` and open it on the \
 phone; it updates the earlier versions in place. To get each new version by \
-itself, add this repository to Obtainium.
+itself, add this repository to Obtainium, or add the F-Droid repository \
+`https://nivaca.codeberg.page/fdroid/repo` to F-Droid (see "Installing" in \
+the README).
 
 **Verify:**
 

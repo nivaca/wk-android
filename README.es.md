@@ -145,6 +145,12 @@ publicaciones son la misma app, y cualquiera de las dos actualiza a la otra. Par
 release se ha de compilar desde el commit de la etiqueta, porque el APK guarda el commit del
 que salió.
 
+Las notas de cada versión las escribe el script de publicación, a partir de los registros
+de cambios (`tools/store_notes.py`). La app está también en mi propio repositorio de F-Droid
+(véase «Instalación»), con los mismos APK firmados de las versiones publicadas; el script de
+publicación pone allí cada versión nueva. Su código es
+[nivaca/fdroid](https://codeberg.org/nivaca/fdroid), en Codeberg.
+
 ## Cómo funciona
 
 Como py-wk, la app pide a la API REST del Wiktionary el HTML de cada página
