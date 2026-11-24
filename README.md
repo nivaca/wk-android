@@ -17,6 +17,20 @@ and Wikipedia are trademarks of the Wikimedia Foundation.
 
 I am Nicolás Vaughan (<nicolasvaughan@proton.me>), and I wrote it in 2026.
 
+## Installing
+
+The signed APK of each version is in the releases, on
+[GitHub](https://github.com/nivaca/wk-android/releases) and
+[Codeberg](https://codeberg.org/nivaca/wk-android/releases).
+
+[![Get it on Obtainium](docs/img/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22io.github.nivaca.wk%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fnivaca%2Fwk-android%22%2C%22author%22%3A%22nivaca%22%2C%22name%22%3A%22Wiktionary%20Reader%22%7D)
+
+With [Obtainium](https://github.com/ImranR98/Obtainium) the phone installs the newest release
+and then each new one over the old. The badge adds the app to Obtainium in one touch, if
+Obtainium is installed (the link passes through Obtainium's own redirect page, which has
+analytics); without it, add the app in Obtainium by hand, with the address
+`https://github.com/nivaca/wk-android`.
+
 ## What it does
 
 - A search box with suggestions from Wiktionary as you type. The first page lists your
@@ -106,8 +120,6 @@ project, a clean `main` and `keystore.properties`. If it stops after tagging, ru
 again publishes what is missing; a release that lacks a file on either forge gets it, if the
 files it has on GitHub are those in `dist/`.
 
-On the phone, [Obtainium](https://github.com/ImranR98/Obtainium) can watch the releases of
-this repository and install each new APK over the old one.
 
 ## F-Droid
 
