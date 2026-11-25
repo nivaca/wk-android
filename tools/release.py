@@ -40,9 +40,9 @@ En orden:
    collect: el árbol de la etiqueta, firmado, con SHA256SUMS y la clave
    pública, cada firma comprobada con solo esa clave), antes de subir
    nada a las forjas, y al final, salvo con --no-zenodo, lo sube a Zenodo
-   como borrador (tools/zenodo.py upload, con el token de $ZENODO_TOKEN).
-   Aquí nunca se publica: el borrador se revisa y se publica a mano en
-   Zenodo.
+   como borrador (tools/zenodo.py upload, con el token de $ZENODO_TOKEN
+   o del llavero). Aquí nunca se publica: el borrador se revisa y se
+   publica a mano en Zenodo.
 
 Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
 pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 7,
@@ -79,6 +79,16 @@ PENDING = {'CHANGELOG.md': 'Unreleased', 'CHANGELOG_es.md': 'Sin publicar'}
 
 DESCRIPTION = ('Release a new version of Wiktionary Reader on GitHub and '
                'Codeberg, from the "Unreleased" sections of the changelogs.')
+
+
+def zenodo_token() -> bool:
+    """Whether tools/zenodo.py finds a Zenodo token, in $ZENODO_TOKEN or
+    in the desktop keyring (secret-tool)."""
+    tool = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), 'tools', 'zenodo.py')
+    done = subprocess.run([sys.executable, tool, 'check-token'],
+                          capture_output=True, check=False)
+    return done.returncode == 0
 
 
 def run(*command, check=True, capture=True, cwd=ROOT) -> str:
@@ -216,9 +226,9 @@ class Release:
         self.key = signing_key()
         # Sin token se para aquí, antes de hacer nada, y no al final
         if not self.args.no_zenodo and not self.args.dry_run \
-                and not os.environ.get('ZENODO_TOKEN'):
-            sys.exit('release: the upload to Zenodo needs a token in '
-                     '$ZENODO_TOKEN (see tools/zenodo.py); --no-zenodo '
+                and not zenodo_token():
+            sys.exit('release: the upload to Zenodo needs a token '
+                     '(see tools/zenodo.py check-token); --no-zenodo '
                      'leaves it out')
         if not ok('gpg', '--batch', '--list-secret-keys', self.key):
             sys.exit(f"release: the gpg key {self.key} is not in this "
@@ -551,7 +561,7 @@ def main(argv=None):
     parser.add_argument('--no-zenodo', action='store_true',
                         help='do not upload the deposit to Zenodo (by default '
                              'it goes as a draft, never published, with the '
-                             'token in $ZENODO_TOKEN)')
+                             'token in $ZENODO_TOKEN or the keyring)')
     parser.add_argument('-n', '--dry-run', action='store_true',
                         help='only say what would be done')
     parser.add_argument('-y', '--yes', action='store_true',
