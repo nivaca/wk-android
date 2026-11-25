@@ -4,7 +4,7 @@
 Codeberg (con tea), con lo que se haya escrito en los registros de cambios
 bajo «Unreleased» y «Sin publicar».
 
-    python3 tools/release.py [--version X.Y] [--dry-run] [--yes]
+    python3 tools/release.py [--version X.Y] [--no-zenodo] [--dry-run] [--yes]
 
 En orden:
 
@@ -35,7 +35,14 @@ En orden:
    clave pública; las notas salen del registro de cambios.  Al final pone
    el APK nuevo en el repositorio de F-Droid propio y lo publica
    (../fdroid-repo/tools/update.py --publish), si ese proyecto está junto
-   a este; si falla, solo avisa, porque la versión ya está publicada.
+   a este; si falla, solo avisa, porque la versión ya está publicada;
+8. reúne el depósito para Zenodo en dist/zenodo/ (tools/zenodo.py
+   collect: el árbol de la etiqueta, firmado, con SHA256SUMS y la clave
+   pública, cada firma comprobada con solo esa clave), antes de subir
+   nada a las forjas, y al final, salvo con --no-zenodo, lo sube a Zenodo
+   como borrador (tools/zenodo.py upload, con el token de $ZENODO_TOKEN).
+   Aquí nunca se publica: el borrador se revisa y se publica a mano en
+   Zenodo.
 
 Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
 pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 7,
@@ -207,6 +214,12 @@ class Release:
             sys.exit('release: there is no keystore.properties, so the APK '
                      'would not be signed (see the README)')
         self.key = signing_key()
+        # Sin token se para aquí, antes de hacer nada, y no al final
+        if not self.args.no_zenodo and not self.args.dry_run \
+                and not os.environ.get('ZENODO_TOKEN'):
+            sys.exit('release: the upload to Zenodo needs a token in '
+                     '$ZENODO_TOKEN (see tools/zenodo.py); --no-zenodo '
+                     'leaves it out')
         if not ok('gpg', '--batch', '--list-secret-keys', self.key):
             sys.exit(f"release: the gpg key {self.key} is not in this "
                      "machine's keyring")
@@ -369,6 +382,10 @@ Free software, under the GNU General Public License, version 3 or later.
                 sys.exit(f'release: there is no {f}')
         self.sums(apk)
         self.verify(tag, [apk, SUMS])
+        # The deposit for Zenodo, from the tag: made before anything leaves
+        # this machine, uploaded at the end
+        zenodo = [sys.executable, os.path.join(ROOT, 'tools', 'zenodo.py')]
+        run(*zenodo, 'collect', '--tag', tag, capture=False)
         files = self.files(name)
         run('git', 'push', 'origin', BRANCH, capture=False)
         run('git', 'push', 'origin', f'refs/tags/{tag}', capture=False)
@@ -397,6 +414,10 @@ Free software, under the GNU General Public License, version 3 or later.
                     capture=False, cwd=tmp)
         print(f'\nReleased Wiktionary Reader {name}.')
         update_fdroid_repo()
+        if self.args.no_zenodo:
+            print('Zenodo: not uploaded (--no-zenodo).')
+        else:
+            run(*zenodo, 'upload', capture=False)
 
     # Una versión ya publicada ------------------------------------------
 
@@ -527,6 +548,10 @@ def main(argv=None):
                                      description=DESCRIPTION)
     parser.add_argument('--version', metavar='X.Y',
                         help='the new version (default: the next minor one)')
+    parser.add_argument('--no-zenodo', action='store_true',
+                        help='do not upload the deposit to Zenodo (by default '
+                             'it goes as a draft, never published, with the '
+                             'token in $ZENODO_TOKEN)')
     parser.add_argument('-n', '--dry-run', action='store_true',
                         help='only say what would be done')
     parser.add_argument('-y', '--yes', action='store_true',

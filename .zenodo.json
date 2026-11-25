@@ -1,0 +1,19 @@
+{
+  "title": "Wiktionary Reader",
+  "upload_type": "software",
+  "description": "<p>A small Android app for reading the English Wiktionary: type a word, in any language, and it shows the whole entry, with its inflection tables, adapted to the phone.</p>",
+  "creators": [
+    {
+      "name": "Vaughan, Nicolas",
+      "affiliation": "Universidad de los Andes",
+      "orcid": "0000-0002-2877-0539"
+    }
+  ],
+  "license": "gpl-3.0-or-later",
+  "access_right": "open",
+  "keywords": [
+    "Wiktionary",
+    "dictionary",
+    "Android"
+  ]
+}
