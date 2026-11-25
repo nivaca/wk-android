@@ -14,6 +14,9 @@ Los cambios de cada versión de Wiktionary Reader (wk en la 1.0). El código est
   admite. El token puede guardarse en el llavero del escritorio
   (`secret-tool store --label="Zenodo token" service zenodo`) en vez de en
   `$ZENODO_TOKEN`; `tools/zenodo.py check-token` dice si hay uno.
+- `tools/zenodo.py`: la descripción del depósito deja fuera la línea que
+  lleva a los README en otras lenguas y la sección Screenshots, cuyas
+  imágenes Zenodo no muestra.
 
 ## 1.4 — 2026-11-23
 

@@ -14,6 +14,9 @@ All notable changes to Wiktionary Reader (called wk in 1.0). The source is on
   be kept in the desktop keyring (`secret-tool store --label="Zenodo
   token" service zenodo`) instead of `$ZENODO_TOKEN`; `tools/zenodo.py
   check-token` says whether there is one.
+- `tools/zenodo.py`: the description of the deposit leaves out the line
+  that points to the README in other languages and the Screenshots section,
+  whose images Zenodo does not show.
 
 ## 1.4 — 2026-11-23
 
