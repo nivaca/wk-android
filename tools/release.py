@@ -4,7 +4,7 @@
 Codeberg (con tea), con lo que se haya escrito en los registros de cambios
 bajo «Unreleased» y «Sin publicar».
 
-    python3 tools/release.py [--version X.Y] [--no-zenodo] [--dry-run] [--yes]
+    python3 tools/release.py [--version X.Y] [--zenodo-draft | --no-zenodo] [--dry-run] [--yes]
 
 En orden:
 
@@ -40,9 +40,10 @@ En orden:
    collect: el árbol de la etiqueta, firmado, con SHA256SUMS y la clave
    pública, cada firma comprobada con solo esa clave), antes de subir
    nada a las forjas, y al final, salvo con --no-zenodo, lo sube a Zenodo
-   como borrador (tools/zenodo.py upload, con el token de $ZENODO_TOKEN
-   o del llavero). Aquí nunca se publica: el borrador se revisa y se
-   publica a mano en Zenodo.
+   y lo publica (tools/zenodo.py upload --publish, con el token de
+   $ZENODO_TOKEN o del llavero), con un DOI nuevo bajo el mismo DOI de
+   concepto.  Con --zenodo-draft lo deja como borrador, para publicarlo a
+   mano (o con tools/zenodo.py publish).
 
 Antes del paso 3 muestra lo que va a hacer y pregunta; con --yes no
 pregunta, y con --dry-run solo lo muestra.  Si algo falla en el paso 7,
@@ -426,8 +427,10 @@ Free software, under the GNU General Public License, version 3 or later.
         update_fdroid_repo()
         if self.args.no_zenodo:
             print('Zenodo: not uploaded (--no-zenodo).')
-        else:
+        elif self.args.zenodo_draft:
             run(*zenodo, 'upload', capture=False)
+        else:
+            run(*zenodo, 'upload', '--publish', capture=False)
 
     # Una versión ya publicada ------------------------------------------
 
@@ -558,10 +561,13 @@ def main(argv=None):
                                      description=DESCRIPTION)
     parser.add_argument('--version', metavar='X.Y',
                         help='the new version (default: the next minor one)')
-    parser.add_argument('--no-zenodo', action='store_true',
+    zenodo = parser.add_mutually_exclusive_group()
+    zenodo.add_argument('--no-zenodo', action='store_true',
                         help='do not upload the deposit to Zenodo (by default '
-                             'it goes as a draft, never published, with the '
-                             'token in $ZENODO_TOKEN or the keyring)')
+                             'it is uploaded and published, with the token in '
+                             '$ZENODO_TOKEN or the keyring)')
+    zenodo.add_argument('--zenodo-draft', action='store_true',
+                        help='upload it to Zenodo as a draft, not published')
     parser.add_argument('-n', '--dry-run', action='store_true',
                         help='only say what would be done')
     parser.add_argument('-y', '--yes', action='store_true',
